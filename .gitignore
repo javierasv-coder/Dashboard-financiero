@@ -1,0 +1,33 @@
+# Dependencias
+node_modules/
+
+# Builds
+dist/
+
+# Archivos de entorno (variables sensibles como SUPABASE_KEY)
+.env
+.env.local
+.env.*.local
+
+# Archivos de Supabase CLI
+.supabase/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+bun-debug.log*
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+
+# IDE configs
+.vscode/
+.idea/
+
+# Cache
+.cache/
+.parcel-cache/
+coverage/
