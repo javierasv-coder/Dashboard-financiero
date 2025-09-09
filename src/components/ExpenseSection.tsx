@@ -18,7 +18,7 @@ export function ExpenseSection({ transactions, selectedMonth, selectedYear, onDe
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('es-MX', {
       style: 'currency',
-      currency: 'MXN',
+      currency: 'CLP',
     }).format(amount);
   };
 

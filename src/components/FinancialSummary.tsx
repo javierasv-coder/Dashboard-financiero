@@ -9,6 +9,9 @@ interface FinancialSummaryProps {
   monthlySavings: number;
   savingsRate: number;
   debt: number;
+  totalAccumulatedSavings: number;
+  goalSavings: number;
+  freeSavings: number;
 }
 
 export function FinancialSummary({
@@ -17,7 +20,10 @@ export function FinancialSummary({
   monthlyExpenses,
   monthlySavings,
   savingsRate,
-  debt
+  debt,
+  totalAccumulatedSavings,
+  goalSavings,
+  freeSavings
 }: FinancialSummaryProps) {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('es-ES', {
@@ -72,27 +78,64 @@ export function FinancialSummary({
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
-      {cards.map((card, index) => (
-        <Card key={index} className="border-0 shadow-sm">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4">
-              <div className={`w-12 h-12 rounded-lg ${card.bgColor} flex items-center justify-center`}>
-                <card.icon className={`h-6 w-6 ${card.iconColor}`} />
+    <>
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+        {cards.map((card, index) => (
+          <Card key={index} className="border-0 shadow-sm">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-4">
+                <div className={`w-12 h-12 rounded-lg ${card.bgColor} flex items-center justify-center`}>
+                  <card.icon className={`h-6 w-6 ${card.iconColor}`} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm text-slate-600 mb-1">{card.title}</p>
+                  <p className={`text-xl font-medium ${card.color} truncate`}>
+                    {card.value}
+                  </p>
+                  {card.subtitle && (
+                    <p className="text-xs text-slate-500 mt-1">{card.subtitle}</p>
+                  )}
+                </div>
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm text-slate-600 mb-1">{card.title}</p>
-                <p className={`text-xl font-medium ${card.color} truncate`}>
-                  {card.value}
-                </p>
-                {card.subtitle && (
-                  <p className="text-xs text-slate-500 mt-1">{card.subtitle}</p>
-                )}
-              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Balance de Ahorros Desglosado */}
+      <Card className="border-0 shadow-sm">
+        <CardContent className="p-6">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center">
+              <PiggyBank className="h-5 w-5 text-blue-600" />
             </div>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
+            <div>
+              <h3 className="text-slate-900">Balance de Ahorros</h3>
+              <p className="text-sm text-slate-600">Distribución de tus ahorros</p>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="p-4 bg-blue-50 rounded-lg">
+              <p className="text-sm text-slate-600 mb-1">Total Acumulado</p>
+              <p className="text-xl text-blue-700">{formatCurrency(totalAccumulatedSavings)}</p>
+              <p className="text-xs text-slate-500 mt-1">Todos los ahorros</p>
+            </div>
+            
+            <div className="p-4 bg-purple-50 rounded-lg">
+              <p className="text-sm text-slate-600 mb-1">Ahorros con Metas</p>
+              <p className="text-xl text-purple-700">{formatCurrency(goalSavings)}</p>
+              <p className="text-xs text-slate-500 mt-1">Asignados a objetivos</p>
+            </div>
+            
+            <div className="p-4 bg-emerald-50 rounded-lg">
+              <p className="text-sm text-slate-600 mb-1">Ahorro Libre</p>
+              <p className="text-xl text-emerald-700">{formatCurrency(freeSavings)}</p>
+              <p className="text-xs text-slate-500 mt-1">Sin meta específica</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </>
   );
 }

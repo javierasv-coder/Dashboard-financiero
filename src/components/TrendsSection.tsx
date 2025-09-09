@@ -13,7 +13,7 @@ export function TrendsSection({ transactions, selectedYear }: TrendsSectionProps
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('es-MX', {
       style: 'currency',
-      currency: 'MXN',
+      currency: 'CLP',
     }).format(amount);
   };
 

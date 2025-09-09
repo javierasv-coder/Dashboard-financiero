@@ -16,7 +16,7 @@ export function IncomeSection({ transactions, selectedMonth, selectedYear, onDel
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('es-MX', {
       style: 'currency',
-      currency: 'MXN',
+      currency: 'CLP',
     }).format(amount);
   };
 

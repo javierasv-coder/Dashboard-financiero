@@ -28,6 +28,7 @@ export interface Goal {
   currentAmount: number;
   targetDate: string;
   category: string;
+  isUsed: boolean;
 }
 
 // Datos mock para la demostración
@@ -51,9 +52,10 @@ const mockTransactions: Transaction[] = [
 ];
 
 const mockGoals: Goal[] = [
-  { id: '1', name: 'Fondo de Emergencia', targetAmount: 10000, currentAmount: 3500, targetDate: '2025-12-31', category: 'Emergencia' },
-  { id: '2', name: 'Viaje a Europa', targetAmount: 5000, currentAmount: 1200, targetDate: '2025-06-30', category: 'Viaje' },
-  { id: '3', name: 'Curso de Programación', targetAmount: 1500, currentAmount: 800, targetDate: '2025-03-31', category: 'Educación' },
+  { id: '1', name: 'Fondo de Emergencia', targetAmount: 10000, currentAmount: 3500, targetDate: '2025-12-31', category: 'Emergencia', isUsed: false },
+  { id: '2', name: 'Viaje a Europa', targetAmount: 5000, currentAmount: 1200, targetDate: '2025-06-30', category: 'Viaje', isUsed: false },
+  { id: '3', name: 'Curso de Programación', targetAmount: 1500, currentAmount: 1500, targetDate: '2025-03-31', category: 'Educación', isUsed: false },
+  { id: '4', name: 'Laptop Nueva', targetAmount: 2000, currentAmount: 2000, targetDate: '2025-01-15', category: 'Tecnología', isUsed: true },
 ];
 
 const mockBills: Bill[] = [
@@ -66,6 +68,7 @@ export default function App() {
   const [transactions, setTransactions] = useState<Transaction[]>(mockTransactions);
   const [goals, setGoals] = useState<Goal[]>(mockGoals);
   const [bills, setBills] = useState<Bill[]>(mockBills);
+  const [freeSavings, setFreeSavings] = useState<number>(750); // Ahorro libre inicial
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
@@ -82,11 +85,12 @@ export default function App() {
     setTransactions(prev => prev.filter(t => t.id !== transactionId));
   };
 
-  const addGoal = (goal: Omit<Goal, 'id' | 'currentAmount'>) => {
+  const addGoal = (goal: Omit<Goal, 'id' | 'currentAmount' | 'isUsed'>) => {
     const newGoal = {
       ...goal,
       id: Date.now().toString(),
       currentAmount: 0,
+      isUsed: false,
     };
     setGoals(prev => [...prev, newGoal]);
   };
@@ -149,6 +153,85 @@ export default function App() {
     });
   };
 
+  const addFreeSavings = (amount: number) => {
+    setFreeSavings(prev => prev + amount);
+    
+    // Registrar como transacción de ahorro
+    const savingTransaction: Omit<Transaction, 'id'> = {
+      type: 'saving',
+      amount: amount,
+      category: 'Ahorro Libre',
+      description: 'Ahorro libre (sin meta específica)',
+      date: new Date().toISOString().split('T')[0],
+    };
+    
+    addTransaction(savingTransaction);
+  };
+
+  const withdrawFreeSavings = (amount: number, description: string) => {
+    if (amount > freeSavings) {
+      toast.error('Fondos insuficientes', {
+        description: 'No tienes suficiente ahorro libre para este retiro',
+      });
+      return;
+    }
+
+    setFreeSavings(prev => prev - amount);
+    
+    // Registrar como gasto
+    const expenseTransaction: Omit<Transaction, 'id'> = {
+      type: 'expense',
+      amount: amount,
+      category: 'Retiro de Ahorro',
+      description: `Retiro de ahorro libre: ${description}`,
+      date: new Date().toISOString().split('T')[0],
+    };
+    
+    addTransaction(expenseTransaction);
+
+    toast.success('Retiro realizado exitosamente', {
+      description: `Se retiraron ${new Intl.NumberFormat('es-ES', {
+        style: 'currency',
+        currency: 'EUR',
+      }).format(amount)} del ahorro libre`,
+    });
+  };
+
+  const useGoalSavings = (goalId: string) => {
+    const goal = goals.find(g => g.id === goalId);
+    if (!goal || goal.currentAmount === 0 || goal.isUsed) return;
+
+    const amount = goal.currentAmount;
+    
+    // Marcar la meta como usada
+    setGoals(prev => prev.map(g => 
+      g.id === goalId 
+        ? { ...g, isUsed: true }
+        : g
+    ));
+    
+    // Registrar como gasto
+    const expenseTransaction: Omit<Transaction, 'id'> = {
+      type: 'expense',
+      amount: amount,
+      category: 'Uso de Meta',
+      description: `Se usaron ${new Intl.NumberFormat('es-ES', {
+        style: 'currency',
+        currency: 'EUR',
+      }).format(amount)} para ${goal.name}`,
+      date: new Date().toISOString().split('T')[0],
+    };
+    
+    addTransaction(expenseTransaction);
+
+    toast.success('Ahorro utilizado exitosamente', {
+      description: `Se usaron ${new Intl.NumberFormat('es-ES', {
+        style: 'currency',
+        currency: 'EUR',
+      }).format(amount)} para ${goal.name}`,
+    });
+  };
+
   // Calcular métricas del mes actual
   const currentMonthTransactions = transactions.filter(t => {
     const transactionDate = new Date(t.date);
@@ -188,6 +271,10 @@ export default function App() {
   
   const savingsRate = monthlyIncome > 0 ? (monthlySavings / monthlyIncome) * 100 : 0;
 
+  // Calcular ahorros totales por categorías
+  const totalGoalSavings = goals.reduce((sum, goal) => sum + goal.currentAmount, 0);
+  const totalAccumulatedSavings = totalSavings + freeSavings;
+
   return (
     <div className="min-h-screen bg-slate-50 p-6">
       <div className="max-w-7xl mx-auto space-y-6">
@@ -219,6 +306,9 @@ export default function App() {
           monthlySavings={monthlySavings}
           savingsRate={savingsRate}
           debt={bills.reduce((total, bill) => total + ((bill.installments - bill.paidInstallments) * bill.installmentAmount), 0)}
+          totalAccumulatedSavings={totalAccumulatedSavings}
+          goalSavings={totalGoalSavings}
+          freeSavings={freeSavings}
         />
 
         {/* Grid de secciones */}
@@ -244,6 +334,10 @@ export default function App() {
             onAddGoal={addGoal}
             onDeleteGoal={deleteGoal}
             addTransaction={addTransaction}
+            freeSavings={freeSavings}
+            onAddFreeSavings={addFreeSavings}
+            onWithdrawFreeSavings={withdrawFreeSavings}
+            onUseGoalSavings={useGoalSavings}
           />
           <BillsSection 
             bills={bills}

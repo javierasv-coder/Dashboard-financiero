@@ -34,9 +34,9 @@ export function BillsSection({ bills, onAddBill, onDeleteBill, onQuickPayment }:
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('es-ES', {
+    return new Intl.NumberFormat('es-MX', {
       style: 'currency',
-      currency: 'EUR',
+      currency: 'CLP',
     }).format(amount);
   };
 
