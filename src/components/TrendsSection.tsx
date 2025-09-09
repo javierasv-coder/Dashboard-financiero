@@ -11,7 +11,7 @@ interface TrendsSectionProps {
 
 export function TrendsSection({ transactions, selectedYear }: TrendsSectionProps) {
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('es-MX', {
+    return new Intl.NumberFormat('es-CL', {
       style: 'currency',
       currency: 'CLP',
     }).format(amount);
@@ -44,7 +44,7 @@ export function TrendsSection({ transactions, selectedYear }: TrendsSectionProps
       const balance = income - expenses - savings;
 
       months.push({
-        month: date.toLocaleDateString('es-ES', { month: 'short', year: '2-digit' }),
+        month: date.toLocaleDateString('es-CL', { month: 'short', year: '2-digit' }),
         income,
         expenses,
         savings,

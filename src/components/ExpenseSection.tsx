@@ -16,7 +16,7 @@ const COLORS = ['#ef4444', '#f97316', '#eab308', '#22c55e', '#3b82f6', '#8b5cf6'
 
 export function ExpenseSection({ transactions, selectedMonth, selectedYear, onDeleteTransaction }: ExpenseSectionProps) {
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('es-MX', {
+    return new Intl.NumberFormat('es-CL', {
       style: 'currency',
       currency: 'CLP',
     }).format(amount);
@@ -190,7 +190,7 @@ export function ExpenseSection({ transactions, selectedMonth, selectedYear, onDe
                     <div>
                       <p className="text-sm text-slate-700">{transaction.description}</p>
                       <p className="text-xs text-slate-500">
-                        {new Date(transaction.date).toLocaleDateString('es-ES')} • {transaction.category}
+                        {new Date(transaction.date).toLocaleDateString('es-CL')} • {transaction.category}
                       </p>
                     </div>
                     <div className="flex items-center gap-2">

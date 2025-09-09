@@ -146,9 +146,9 @@ export default function App() {
 
     // Mostrar notificación de éxito
     toast.success(`Pago realizado exitosamente`, {
-      description: `Se descontaron ${new Intl.NumberFormat('es-ES', {
+      description: `Se descontaron ${new Intl.NumberFormat('es-CL', {
         style: 'currency',
-        currency: 'EUR',
+        currency: 'CLP',
       }).format(bill.installmentAmount)} de ${bill.name}`,
     });
   };
@@ -190,9 +190,9 @@ export default function App() {
     addTransaction(expenseTransaction);
 
     toast.success('Retiro realizado exitosamente', {
-      description: `Se retiraron ${new Intl.NumberFormat('es-ES', {
+      description: `Se retiraron ${new Intl.NumberFormat('es-CL', {
         style: 'currency',
-        currency: 'EUR',
+        currency: 'CLP',
       }).format(amount)} del ahorro libre`,
     });
   };
@@ -215,9 +215,9 @@ export default function App() {
       type: 'expense',
       amount: amount,
       category: 'Uso de Meta',
-      description: `Se usaron ${new Intl.NumberFormat('es-ES', {
+      description: `Se usaron ${new Intl.NumberFormat('es-CL', {
         style: 'currency',
-        currency: 'EUR',
+        currency: 'CLP',
       }).format(amount)} para ${goal.name}`,
       date: new Date().toISOString().split('T')[0],
     };
@@ -225,9 +225,9 @@ export default function App() {
     addTransaction(expenseTransaction);
 
     toast.success('Ahorro utilizado exitosamente', {
-      description: `Se usaron ${new Intl.NumberFormat('es-ES', {
+      description: `Se usaron ${new Intl.NumberFormat('es-CL', {
         style: 'currency',
-        currency: 'EUR',
+        currency: 'CLP',
       }).format(amount)} para ${goal.name}`,
     });
   };

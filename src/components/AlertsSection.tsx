@@ -12,7 +12,7 @@ interface AlertsSectionProps {
 
 export function AlertsSection({ monthlyExpenses, monthlyIncome, goals }: AlertsSectionProps) {
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('es-MX', {
+    return new Intl.NumberFormat('es-CL', {
       style: 'currency',
       currency: 'CLP',
     }).format(amount);
@@ -156,7 +156,7 @@ export function AlertsSection({ monthlyExpenses, monthlyIncome, goals }: AlertsS
                 <div>
                   <p className="text-sm text-slate-800">{payment.name}</p>
                   <p className="text-xs text-slate-600">
-                    {new Date(payment.date).toLocaleDateString('es-ES')}
+                    {new Date(payment.date).toLocaleDateString('es-CL')}
                   </p>
                 </div>
                 <span className={`text-sm ${paymentTypeColors[payment.type as keyof typeof paymentTypeColors]}`}>

@@ -26,9 +26,9 @@ export function FinancialSummary({
   freeSavings
 }: FinancialSummaryProps) {
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('es-ES', {
+    return new Intl.NumberFormat('es-CL', {
       style: 'currency',
-      currency: 'EUR',
+      currency: 'CLP',
     }).format(amount);
   };
 

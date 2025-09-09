@@ -34,14 +34,14 @@ export function BillsSection({ bills, onAddBill, onDeleteBill, onQuickPayment }:
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('es-MX', {
+    return new Intl.NumberFormat('es-CL', {
       style: 'currency',
       currency: 'CLP',
     }).format(amount);
   };
 
   const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString('es-ES', {
+    return new Date(date).toLocaleDateString('es-CL', {
       day: 'numeric',
       month: 'short',
     });

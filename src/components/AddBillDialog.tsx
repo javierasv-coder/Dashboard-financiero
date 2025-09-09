@@ -130,7 +130,7 @@ export function AddBillDialog({ open, onOpenChange, onAddBill }: AddBillDialogPr
             <div className="p-3 bg-blue-50 rounded-lg">
               <p className="text-sm text-blue-700">
                 Cuota mensual: <strong>
-                  {new Intl.NumberFormat('es-MX', {
+                  {new Intl.NumberFormat('es-CL', {
                     style: 'currency',
                     currency: 'CLP',
                   }).format(installmentAmount)}

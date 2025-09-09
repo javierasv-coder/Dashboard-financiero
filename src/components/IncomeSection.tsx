@@ -14,7 +14,7 @@ interface IncomeSectionProps {
 
 export function IncomeSection({ transactions, selectedMonth, selectedYear, onDeleteTransaction }: IncomeSectionProps) {
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('es-MX', {
+    return new Intl.NumberFormat('es-CL', {
       style: 'currency',
       currency: 'CLP',
     }).format(amount);
@@ -39,7 +39,7 @@ export function IncomeSection({ transactions, selectedMonth, selectedYear, onDel
     });
     
     return {
-      month: date.toLocaleDateString('es-ES', { month: 'short' }),
+      month: date.toLocaleDateString('es-CL', { month: 'short' }),
       income: monthTransactions.reduce((sum, t) => sum + t.amount, 0),
     };
   }).reverse();
@@ -137,7 +137,7 @@ export function IncomeSection({ transactions, selectedMonth, selectedYear, onDel
                     <div>
                       <p className="text-sm text-slate-700">{transaction.description}</p>
                       <p className="text-xs text-slate-500">
-                        {new Date(transaction.date).toLocaleDateString('es-ES')} • {transaction.category}
+                        {new Date(transaction.date).toLocaleDateString('es-CL')} • {transaction.category}
                       </p>
                     </div>
                     <div className="flex items-center gap-2">

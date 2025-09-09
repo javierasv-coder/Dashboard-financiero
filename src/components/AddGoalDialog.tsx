@@ -191,13 +191,13 @@ export function AddGoalDialog({ open, onOpenChange, onAddGoal }: AddGoalDialogPr
               <div className="space-y-1 text-xs text-slate-600">
                 <p>• Tiempo disponible: <span className="text-blue-600">{timeCalculation.months} meses</span></p>
                 <p>• Ahorro mensual requerido: <span className="text-emerald-600">
-                  {new Intl.NumberFormat('es-MX', {
+                  {new Intl.NumberFormat('es-CL', {
                     style: 'currency',
                     currency: 'CLP',
                   }).format(timeCalculation.monthlyRequired)}
                 </span></p>
                 <p>• Ahorro semanal requerido: <span className="text-purple-600">
-                  {new Intl.NumberFormat('es-MX', {
+                  {new Intl.NumberFormat('es-CL', {
                     style: 'currency',
                     currency: 'CLP',
                   }).format(timeCalculation.monthlyRequired / 4)}
