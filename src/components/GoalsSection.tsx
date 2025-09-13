@@ -52,16 +52,19 @@ export function GoalsSection({
   };
 
   const calculateProgress = (current: number, target: number) => {
+    if (!target || isNaN(current) || isNaN(target)) return 0;
     return Math.min((current / target) * 100, 100);
   };
+
 
   const calculateDaysUntilTarget = (targetDate: string) => {
     const today = new Date();
     const target = new Date(targetDate);
+    if (isNaN(target.getTime())) return NaN; // Fecha inválida
     const diffTime = target.getTime() - today.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays;
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
   };
+
 
   const handleContribution = (goalId: string) => {
     const amount = parseFloat(contributionAmounts[goalId] || '0');
@@ -139,9 +142,11 @@ export function GoalsSection({
         </CardHeader>
         <CardContent className="space-y-4">
           {goals.map((goal) => {
-            const progress = calculateProgress(goal.currentAmount, goal.targetAmount);
-            const daysLeft = calculateDaysUntilTarget(goal.targetDate);
-            const remaining = goal.targetAmount - goal.currentAmount;
+            const current = goal.currentAmount ?? 0;
+            const target = goal.targetAmount ?? 0;
+            const progress = calculateProgress(current, target);
+            const daysLeft = goal.targetDate ? calculateDaysUntilTarget(goal.targetDate) : NaN;
+            const remaining = target - current;
             
             return (
               <div key={goal.id} className="p-4 bg-slate-50 rounded-lg space-y-3 group">
@@ -178,8 +183,8 @@ export function GoalsSection({
                     <span>Faltan {formatCurrency(remaining)}</span>
                     <div className="flex items-center gap-1">
                       <Calendar className="h-3 w-3" />
-                      <span className={daysLeft < 0 ? 'text-red-600' : ''}>
-                        {daysLeft > 0 ? `${daysLeft} días` : 'Fecha vencida'}
+                      <span className={isNaN(daysLeft) || daysLeft < 0 ? 'text-red-600' : ''}>
+                        {isNaN(daysLeft) ? 'Fecha inválida' : (daysLeft > 0 ? `${daysLeft} días` : 'Fecha vencida')}
                       </span>
                     </div>
                   </div>
@@ -187,7 +192,13 @@ export function GoalsSection({
 
                 {/* Fecha objetivo */}
                 <div className="flex items-center gap-2 text-xs text-slate-600">
-                  <span>Meta: {formatDate(goal.targetDate)}</span>
+                  <span>
+                    Meta:{' '}
+                    {goal.targetDate && !isNaN(new Date(goal.targetDate).getTime())
+                      ? formatDate(goal.targetDate)
+                      : 'Sin fecha válida'}
+                  </span>
+
                 </div>
 
                 {/* Agregar contribución */}

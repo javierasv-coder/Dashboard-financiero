@@ -5,12 +5,13 @@ import { ExpenseSection } from './components/ExpenseSection';
 import { GoalsSection } from './components/GoalsSection';
 import { TrendsSection } from './components/TrendsSection';
 import { AlertsSection } from './components/AlertsSection';
-import { BillsSection, Bill } from './components/BillsSection';
+import { BillsSection } from './components/BillsSection'; // ✅ ahora no recibe props
 import { AddTransactionDialog } from './components/AddTransactionDialog';
 import { Button } from './components/ui/button';
 import { Toaster } from './components/ui/sonner';
 import { Plus, DollarSign } from 'lucide-react';
 import { toast } from 'sonner@2.0.3';
+import { useGoals } from './services/useGoals'; // Ajusta la ruta si es necesario
 
 export interface Transaction {
   id: string;
@@ -29,6 +30,7 @@ export interface Goal {
   targetDate: string;
   category: string;
   isUsed: boolean;
+  description: string;
 }
 
 // Datos mock para la demostración
@@ -52,22 +54,15 @@ const mockTransactions: Transaction[] = [
 ];
 
 const mockGoals: Goal[] = [
-  { id: '1', name: 'Fondo de Emergencia', targetAmount: 10000, currentAmount: 3500, targetDate: '2025-12-31', category: 'Emergencia', isUsed: false },
-  { id: '2', name: 'Viaje a Europa', targetAmount: 5000, currentAmount: 1200, targetDate: '2025-06-30', category: 'Viaje', isUsed: false },
-  { id: '3', name: 'Curso de Programación', targetAmount: 1500, currentAmount: 1500, targetDate: '2025-03-31', category: 'Educación', isUsed: false },
-  { id: '4', name: 'Laptop Nueva', targetAmount: 2000, currentAmount: 2000, targetDate: '2025-01-15', category: 'Tecnología', isUsed: true },
-];
-
-const mockBills: Bill[] = [
-  { id: '1', name: 'Tarjeta Visa', totalAmount: 2400, installments: 12, paidInstallments: 3, installmentAmount: 200, dueDate: '2025-02-15', category: 'Tarjeta de Crédito' },
-  { id: '2', name: 'Préstamo Coche', totalAmount: 15000, installments: 60, paidInstallments: 24, installmentAmount: 250, dueDate: '2025-02-01', category: 'Préstamo Vehicular' },
-  { id: '3', name: 'Curso Online', totalAmount: 600, installments: 6, paidInstallments: 2, installmentAmount: 100, dueDate: '2025-02-10', category: 'Educación' },
+  { id: '1', name: 'Fondo de Emergencia', targetAmount: 10000, currentAmount: 3500, targetDate: '2025-12-31', category: 'Emergencia', isUsed: false, description: '' },
+  { id: '2', name: 'Viaje a Europa', targetAmount: 5000, currentAmount: 1200, targetDate: '2025-06-30', category: 'Viaje', isUsed: false, description: '' },
+  { id: '3', name: 'Curso de Programación', targetAmount: 1500, currentAmount: 1500, targetDate: '2025-03-31', category: 'Educación', isUsed: false, description: '' },
+  { id: '4', name: 'Laptop Nueva', targetAmount: 2000, currentAmount: 2000, targetDate: '2025-01-15', category: 'Tecnología', isUsed: true, description: '' },
 ];
 
 export default function App() {
   const [transactions, setTransactions] = useState<Transaction[]>(mockTransactions);
-  const [goals, setGoals] = useState<Goal[]>(mockGoals);
-  const [bills, setBills] = useState<Bill[]>(mockBills);
+  const { goals, loading: loadingGoals, addGoal, deleteGoal, quickPayment, updateGoalAmount, useGoalSavings } = useGoals(1); // Usa el ID real del usuario autenticado
   const [freeSavings, setFreeSavings] = useState<number>(750); // Ahorro libre inicial
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
@@ -85,6 +80,8 @@ export default function App() {
     setTransactions(prev => prev.filter(t => t.id !== transactionId));
   };
 
+
+  /*
   const addGoal = (goal: Omit<Goal, 'id' | 'currentAmount' | 'isUsed'>) => {
     const newGoal = {
       ...goal,
@@ -105,8 +102,8 @@ export default function App() {
 
   const deleteGoal = (goalId: string) => {
     setGoals(prev => prev.filter(g => g.id !== goalId));
-  };
-
+  };*/
+  /*
   const addBill = (bill: Omit<Bill, 'id' | 'paidInstallments' | 'installmentAmount'>) => {
     const installmentAmount = bill.totalAmount / bill.installments;
     const newBill: Bill = {
@@ -152,7 +149,7 @@ export default function App() {
       }).format(bill.installmentAmount)} de ${bill.name}`,
     });
   };
-
+  */
   const addFreeSavings = (amount: number) => {
     setFreeSavings(prev => prev + amount);
     
@@ -197,23 +194,19 @@ export default function App() {
     });
   };
 
-  const useGoalSavings = (goalId: string) => {
+  const handleUseGoalSavings = (goalId: string) => {
     const goal = goals.find(g => g.id === goalId);
     if (!goal || goal.currentAmount === 0 || goal.isUsed) return;
 
     const amount = goal.currentAmount;
-    
-    // Marcar la meta como usada
-    setGoals(prev => prev.map(g => 
-      g.id === goalId 
-        ? { ...g, isUsed: true }
-        : g
-    ));
-    
+
+    // 🔗 Actualizar en Supabase
+    useGoalSavings(goalId);
+
     // Registrar como gasto
     const expenseTransaction: Omit<Transaction, 'id'> = {
       type: 'expense',
-      amount: amount,
+      amount,
       category: 'Uso de Meta',
       description: `Se usaron ${new Intl.NumberFormat('es-CL', {
         style: 'currency',
@@ -221,7 +214,7 @@ export default function App() {
       }).format(amount)} para ${goal.name}`,
       date: new Date().toISOString().split('T')[0],
     };
-    
+
     addTransaction(expenseTransaction);
 
     toast.success('Ahorro utilizado exitosamente', {
@@ -305,7 +298,7 @@ export default function App() {
           monthlyExpenses={monthlyExpenses}
           monthlySavings={monthlySavings}
           savingsRate={savingsRate}
-          debt={bills.reduce((total, bill) => total + ((bill.installments - bill.paidInstallments) * bill.installmentAmount), 0)}
+          debt={0}
           totalAccumulatedSavings={totalAccumulatedSavings}
           goalSavings={totalGoalSavings}
           freeSavings={freeSavings}
@@ -329,22 +322,19 @@ export default function App() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <GoalsSection 
-            goals={goals} 
-            updateGoal={updateGoal}
+            goals={goals}
+            updateGoal={updateGoalAmount} // ✅ actualiza en Supabase
             onAddGoal={addGoal}
             onDeleteGoal={deleteGoal}
             addTransaction={addTransaction}
             freeSavings={freeSavings}
             onAddFreeSavings={addFreeSavings}
             onWithdrawFreeSavings={withdrawFreeSavings}
-            onUseGoalSavings={useGoalSavings}
+            onUseGoalSavings={useGoalSavings} // ✅ actualiza en Supabase
           />
-          <BillsSection 
-            bills={bills}
-            onAddBill={addBill}
-            onDeleteBill={deleteBill}
-            onQuickPayment={handleQuickPayment}
-          />
+
+
+          <BillsSection />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
