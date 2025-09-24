@@ -4,7 +4,7 @@ import { Button } from "./ui/button";
 import { Progress } from "./ui/progress";
 import { AddBillDialog } from "./AddBillDialog";
 import { CreditCard, Plus, Calendar, DollarSign, Trash2, Zap } from "lucide-react";
-import { useBills } from "../services/useBills";
+import { useBills } from "../hooks/useBills";
 
 export interface Bill {
   id: string;

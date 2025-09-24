@@ -6,35 +6,34 @@ import { Input } from './ui/input';
 import { AddGoalDialog } from './AddGoalDialog';
 import { Target, Calendar, TrendingUp, Plus, Trash2, PiggyBank, CheckCircle, Minus, Wallet } from 'lucide-react';
 import { Goal, Transaction } from '../App';
+import { useFreeSavings } from '../hooks/useFreeSavings'; // ajusta la ruta si es distinta
 
 interface GoalsSectionProps {
+  usuarioId: number; // nuevo
   goals: Goal[];
   updateGoal: (goalId: string, amount: number) => void;
   onAddGoal: (goal: Omit<Goal, 'id' | 'currentAmount' | 'isUsed'>) => void;
   onDeleteGoal: (goalId: string) => void;
   addTransaction: (transaction: Omit<Transaction, 'id'>) => void;
-  freeSavings: number;
-  onAddFreeSavings: (amount: number) => void;
-  onWithdrawFreeSavings: (amount: number, description: string) => void;
   onUseGoalSavings: (goalId: string) => void;
 }
 
+
 export function GoalsSection({ 
-  goals, 
-  updateGoal, 
-  onAddGoal, 
-  onDeleteGoal, 
-  addTransaction, 
-  freeSavings, 
-  onAddFreeSavings, 
-  onWithdrawFreeSavings, 
-  onUseGoalSavings 
+  goals,
+  updateGoal,
+  onAddGoal,
+  onDeleteGoal,
+  addTransaction,
+  onUseGoalSavings
 }: GoalsSectionProps) {
+  const usuarioId = 1; 
   const [contributionAmounts, setContributionAmounts] = useState<Record<string, string>>({});
   const [freeSavingAmount, setFreeSavingAmount] = useState<string>('');
   const [withdrawAmount, setWithdrawAmount] = useState<string>('');
   const [withdrawDescription, setWithdrawDescription] = useState<string>('');
   const [isAddGoalDialogOpen, setIsAddGoalDialogOpen] = useState(false);
+  const {total: freeSavings, addFreeSaving, withdrawFreeSaving, loading: loadingFreeSavings} = useFreeSavings(usuarioId);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('es-CL', {
@@ -92,22 +91,23 @@ export function GoalsSection({
     }
   };
 
-  const handleAddFreeSaving = () => {
+  const handleAddFreeSaving = async () => {
     const amount = parseFloat(freeSavingAmount);
     if (amount > 0) {
-      onAddFreeSavings(amount);
+      await addFreeSaving(amount);
       setFreeSavingAmount('');
     }
   };
 
-  const handleWithdrawFreeSaving = () => {
+  const handleWithdrawFreeSaving = async () => {
     const amount = parseFloat(withdrawAmount);
     if (amount > 0 && withdrawDescription.trim()) {
-      onWithdrawFreeSavings(amount, withdrawDescription.trim());
+      await withdrawFreeSaving(amount); // ya no se guarda la descripción
       setWithdrawAmount('');
       setWithdrawDescription('');
     }
   };
+
 
   const handleUseGoalSaving = (goalId: string) => {
     const goal = goals.find(g => g.id === goalId);
@@ -298,6 +298,7 @@ export function GoalsSection({
                   size="sm"
                   onClick={handleAddFreeSaving}
                   className="bg-emerald-600 hover:bg-emerald-700 text-white h-8 px-3"
+                  disabled={loadingFreeSavings}
                 >
                   <PiggyBank className="h-3 w-3 mr-1" />
                   Ahorrar

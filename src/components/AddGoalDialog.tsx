@@ -57,7 +57,8 @@ export function AddGoalDialog({ open, onOpenChange, onAddGoal }: AddGoalDialogPr
       name: formData.name,
       targetAmount: parseFloat(formData.targetAmount),
       targetDate: formData.targetDate,
-      category: formData.category
+      category: formData.category,
+      description: formData.description
     };
 
     onAddGoal(goal);

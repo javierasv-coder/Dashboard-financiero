@@ -11,7 +11,7 @@ import { Button } from './components/ui/button';
 import { Toaster } from './components/ui/sonner';
 import { Plus, DollarSign } from 'lucide-react';
 import { toast } from 'sonner@2.0.3';
-import { useGoals } from './services/useGoals'; // Ajusta la ruta si es necesario
+import { useGoals } from './hooks/useGoals'; // Ajusta la ruta si es necesario
 
 export interface Transaction {
   id: string;
