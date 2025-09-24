@@ -263,7 +263,9 @@ export function GoalsSection({
             );
           })}
 
-          {goals.length === 0 && (
+          {loadingFreeSavings ? (
+            <p className="text-center text-slate-500">Cargando metas...</p>
+          ) : goals.length === 0 && (
             <div className="text-center py-8 text-slate-500">
               <Target className="h-8 w-8 mx-auto mb-2 text-slate-400" />
               <p className="text-sm">No tienes metas financieras activas</p>
