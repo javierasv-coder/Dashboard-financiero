@@ -25,7 +25,7 @@ export function useBills(usuarioId: number) {
         name: row.nombre,
         totalAmount: row.monto_total,
         installments: row.cuotas,
-        paidInstallments: row.pagado ? row.cuotas : 0, // 👈 si quieres usar `pagado`
+        paidInstallments: row.cuotas_pagadas || 0,
         installmentAmount: row.monto_cuota,
         dueDate: row.fecha_vencimiento,
         category: row.categoria,
@@ -73,15 +73,52 @@ export function useBills(usuarioId: number) {
   };
 
   const quickPayment = async (id: string) => {
-    // 👀 Este es un ejemplo: marcar cuenta como pagada completa
-    const { error } = await supabase.from("cuentas_pendientes").update({ pagado: true }).eq("id", id);
+    const bill = bills.find((b) => b.id === id);
+    if (!bill) return;
 
-    if (error) {
-      console.error("Error actualizando cuenta:", error);
-    } else {
-      fetchBills();
+    // Si ya está completamente pagado, salir
+    if (bill.paidInstallments >= bill.installments) return;
+
+    const newPaidInstallments = bill.paidInstallments + 1;
+    const isFullyPaid = newPaidInstallments === bill.installments;
+
+    // 1. Actualiza la cuenta con la nueva cuota pagada
+    const { error: updateError } = await supabase
+      .from("cuentas_pendientes")
+      .update({
+        pagado: isFullyPaid,
+        // Aquí almacenamos el nuevo valor de cuotas pagadas (suponiendo que lo agregas a la tabla)
+        cuotas_pagadas: newPaidInstallments,
+      })
+      .eq("id", id);
+
+    if (updateError) {
+      console.error("Error actualizando cuota:", updateError);
+      return;
     }
+
+    // 2. Inserta una transacción de gasto en la tabla "transacciones"
+    const bill_name = bill.name; // Guardar el nombre de la cuenta antes de la actualización
+    const { error: transactionError } = await supabase.from("transacciones").insert([
+      {
+        usuario_id: 1, // 👈 estático por ahora
+        tipo: "GASTO",
+        monto: bill.installmentAmount,
+        categoria: "PAGO DE CUENTA",
+        descripcion: `PAGO DE CUOTA ${newPaidInstallments}/${bill.installments} PARA ${bill.name.toUpperCase()}`,
+        fecha: new Date().toISOString(),
+        cuenta_pendiente_id: id,
+      },
+    ]);
+
+    if (transactionError) {
+      console.error("Error creando transacción:", transactionError);
+    }
+
+    // 3. Refresca los datos
+    fetchBills();
   };
+
 
   return { bills, loading, addBill, deleteBill, quickPayment };
 }
