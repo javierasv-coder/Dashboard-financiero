@@ -104,7 +104,7 @@ export function useBills(usuarioId: number) {
         usuario_id: 1, // 👈 estático por ahora
         tipo: "GASTO",
         monto: bill.installmentAmount,
-        categoria: "PAGO DE CUENTA",
+        categoria: "Pago de Cuenta",
         descripcion: `PAGO DE CUOTA ${newPaidInstallments}/${bill.installments} PARA ${bill.name.toUpperCase()}`,
         fecha: new Date().toISOString(),
         cuenta_pendiente_id: id,

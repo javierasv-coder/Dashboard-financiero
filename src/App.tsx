@@ -1,21 +1,22 @@
-import React, { useState } from 'react';
+import React, { use, useState } from 'react';
 import { FinancialSummary } from './components/FinancialSummary';
 import { IncomeSection } from './components/IncomeSection';
 import { ExpenseSection } from './components/ExpenseSection';
 import { GoalsSection } from './components/GoalsSection';
 import { TrendsSection } from './components/TrendsSection';
 import { AlertsSection } from './components/AlertsSection';
-import { BillsSection } from './components/BillsSection'; // ✅ ahora no recibe props
+import { BillsSection } from './components/BillsSection'; 
 import { AddTransactionDialog } from './components/AddTransactionDialog';
 import { Button } from './components/ui/button';
 import { Toaster } from './components/ui/sonner';
 import { Plus, DollarSign } from 'lucide-react';
 import { toast } from 'sonner@2.0.3';
-import { useGoals } from './hooks/useGoals'; // Ajusta la ruta si es necesario
+import { useGoals } from './hooks/useGoals';
+import { useTransactions } from './hooks/useTransactions'; 
 
 export interface Transaction {
   id: string;
-  type: 'income' | 'expense' | 'saving';
+  type: 'INGRESO' | 'GASTO' | 'AHORRO';
   amount: number;
   category: string;
   description: string;
@@ -36,21 +37,21 @@ export interface Goal {
 // Datos mock para la demostración
 const mockTransactions: Transaction[] = [
   // Diciembre 2024 (mes anterior)
-  { id: '101', type: 'income', amount: 3200, category: 'Salario', description: 'Salario diciembre', date: '2024-12-01' },
-  { id: '102', type: 'income', amount: 400, category: 'Freelance', description: 'Proyecto pequeño', date: '2024-12-15' },
-  { id: '103', type: 'expense', amount: 1200, category: 'Vivienda', description: 'Renta diciembre', date: '2024-12-01' },
-  { id: '104', type: 'expense', amount: 250, category: 'Alimentación', description: 'Compras diciembre', date: '2024-12-10' },
-  { id: '105', type: 'expense', amount: 120, category: 'Transporte', description: 'Gasolina diciembre', date: '2024-12-12' },
-  { id: '106', type: 'saving', amount: 300, category: 'Ahorro', description: 'Ahorro diciembre', date: '2024-12-01' },
+  { id: '101', type: 'INGRESO', amount: 3200, category: 'Salario', description: 'Salario diciembre', date: '2024-12-01' },
+  { id: '102', type: 'INGRESO', amount: 400, category: 'Freelance', description: 'Proyecto pequeño', date: '2024-12-15' },
+  { id: '103', type: 'GASTO', amount: 1200, category: 'Vivienda', description: 'Renta diciembre', date: '2024-12-01' },
+  { id: '104', type: 'GASTO', amount: 250, category: 'Alimentación', description: 'Compras diciembre', date: '2024-12-10' },
+  { id: '105', type: 'GASTO', amount: 120, category: 'Transporte', description: 'Gasolina diciembre', date: '2024-12-12' },
+  { id: '106', type: 'AHORRO', amount: 300, category: 'Ahorro', description: 'Ahorro diciembre', date: '2024-12-01' },
   
   // Enero 2025 (mes actual)
-  { id: '1', type: 'income', amount: 3500, category: 'Salario', description: 'Salario mensual', date: '2025-01-01' },
-  { id: '2', type: 'income', amount: 800, category: 'Freelance', description: 'Proyecto web', date: '2025-01-15' },
-  { id: '3', type: 'expense', amount: 1200, category: 'Vivienda', description: 'Renta mensual', date: '2025-01-01' },
-  { id: '4', type: 'expense', amount: 300, category: 'Alimentación', description: 'Compras del mes', date: '2025-01-10' },
-  { id: '5', type: 'expense', amount: 150, category: 'Transporte', description: 'Gasolina y mantenimiento', date: '2025-01-12' },
-  { id: '6', type: 'expense', amount: 100, category: 'Ocio', description: 'Cenas y entretenimiento', date: '2025-01-20' },
-  { id: '7', type: 'saving', amount: 500, category: 'Ahorro', description: 'Ahorro mensual', date: '2025-01-01' },
+  { id: '1', type: 'INGRESO', amount: 3500, category: 'Salario', description: 'Salario mensual', date: '2025-01-01' },
+  { id: '2', type: 'INGRESO', amount: 800, category: 'Freelance', description: 'Proyecto web', date: '2025-01-15' },
+  { id: '3', type: 'GASTO', amount: 1200, category: 'Vivienda', description: 'Renta mensual', date: '2025-01-01' },
+  { id: '4', type: 'GASTO', amount: 300, category: 'Alimentación', description: 'Compras del mes', date: '2025-01-10' },
+  { id: '5', type: 'GASTO', amount: 150, category: 'Transporte', description: 'Gasolina y mantenimiento', date: '2025-01-12' },
+  { id: '6', type: 'GASTO', amount: 100, category: 'Ocio', description: 'Cenas y entretenimiento', date: '2025-01-20' },
+  { id: '7', type: 'AHORRO', amount: 500, category: 'Ahorro', description: 'Ahorro mensual', date: '2025-01-01' },
 ];
 
 const mockGoals: Goal[] = [
@@ -61,14 +62,16 @@ const mockGoals: Goal[] = [
 ];
 
 export default function App() {
-  const [transactions, setTransactions] = useState<Transaction[]>(mockTransactions);
-  const { goals, loading: loadingGoals, addGoal, deleteGoal, quickPayment, updateGoalAmount, useGoalSavings } = useGoals(1); // Usa el ID real del usuario autenticado
-  const [freeSavings, setFreeSavings] = useState<number>(750); // Ahorro libre inicial
+  const usuarioId = 1; // 👈 estático por ahora
+  const {transactions, loading: loadingTransactions, addTransaction, deleteTransaction} = useTransactions(usuarioId); 
+  const { goals, loading: loadingGoals, addGoal, deleteGoal, quickPayment, updateGoalAmount, useGoalSavings } = useGoals(usuarioId); 
+  const [freeSavings, setFreeSavings] = useState<number>(0);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
-  const addTransaction = (transaction: Omit<Transaction, 'id'>) => {
+  
+  /*const addTransaction = (transaction: Omit<Transaction, 'id'>) => {
     const newTransaction = {
       ...transaction,
       id: Date.now().toString(),
@@ -78,7 +81,7 @@ export default function App() {
 
   const deleteTransaction = (transactionId: string) => {
     setTransactions(prev => prev.filter(t => t.id !== transactionId));
-  };
+  };*/
 
 
   /*
@@ -151,18 +154,24 @@ export default function App() {
   };
   */
   const addFreeSavings = (amount: number) => {
-    setFreeSavings(prev => prev + amount);
-    
-    // Registrar como transacción de ahorro
+    setFreeSavings((prev) => prev + amount);
+
+    // Registrar como transacción de tipo saving
     const savingTransaction: Omit<Transaction, 'id'> = {
-      type: 'saving',
-      amount: amount,
+      type: 'AHORRO',
+      amount,
       category: 'Ahorro Libre',
       description: 'Ahorro libre (sin meta específica)',
       date: new Date().toISOString().split('T')[0],
     };
-    
     addTransaction(savingTransaction);
+
+    toast.success('Ahorro agregado exitosamente', {
+      description: `Se agregaron ${new Intl.NumberFormat('es-CL', {
+        style: 'currency',
+        currency: 'CLP',
+      }).format(amount)} al ahorro libre`,
+    });
   };
 
   const withdrawFreeSavings = (amount: number, description: string) => {
@@ -177,7 +186,7 @@ export default function App() {
     
     // Registrar como gasto
     const expenseTransaction: Omit<Transaction, 'id'> = {
-      type: 'expense',
+      type: 'GASTO',
       amount: amount,
       category: 'Retiro de Ahorro',
       description: `Retiro de ahorro libre: ${description}`,
@@ -195,17 +204,17 @@ export default function App() {
   };
 
   const handleUseGoalSavings = (goalId: string) => {
-    const goal = goals.find(g => g.id === goalId);
+    const goal = goals.find((g) => g.id === goalId);
     if (!goal || goal.currentAmount === 0 || goal.isUsed) return;
 
     const amount = goal.currentAmount;
 
-    // 🔗 Actualizar en Supabase
+    // Actualiza en Supabase (marca la meta como usada)
     useGoalSavings(goalId);
 
     // Registrar como gasto
     const expenseTransaction: Omit<Transaction, 'id'> = {
-      type: 'expense',
+      type: 'GASTO',
       amount,
       category: 'Uso de Meta',
       description: `Se usaron ${new Intl.NumberFormat('es-CL', {
@@ -214,7 +223,6 @@ export default function App() {
       }).format(amount)} para ${goal.name}`,
       date: new Date().toISOString().split('T')[0],
     };
-
     addTransaction(expenseTransaction);
 
     toast.success('Ahorro utilizado exitosamente', {
@@ -226,37 +234,36 @@ export default function App() {
   };
 
   // Calcular métricas del mes actual
-  const currentMonthTransactions = transactions.filter(t => {
-    const transactionDate = new Date(t.date);
-    return transactionDate.getMonth() === selectedMonth && 
-           transactionDate.getFullYear() === selectedYear;
+  const currentMonthTransactions = transactions.filter((t) => {
+    const d = new Date(t.date);
+    return d.getMonth() === selectedMonth && d.getFullYear() === selectedYear;
   });
 
   const monthlyIncome = currentMonthTransactions
-    .filter(t => t.type === 'income')
+    .filter((t) => t.type === 'INGRESO')
     .reduce((sum, t) => sum + t.amount, 0);
 
   const monthlyExpenses = currentMonthTransactions
-    .filter(t => t.type === 'expense')
+    .filter((t) => t.type === 'GASTO')
     .reduce((sum, t) => sum + t.amount, 0);
 
   const monthlySavings = currentMonthTransactions
-    .filter(t => t.type === 'saving')
+    .filter((t) => t.type === 'AHORRO')
     .reduce((sum, t) => sum + t.amount, 0);
 
   // Calcular saldo acumulado (de todos los meses hasta la fecha)
   const currentDate = new Date(selectedYear, selectedMonth + 1, 0); // Último día del mes seleccionado
   
   const totalIncome = transactions
-    .filter(t => new Date(t.date) <= currentDate && t.type === 'income')
+    .filter((t) => new Date(t.date) <= currentDate && t.type === 'INGRESO')
     .reduce((sum, t) => sum + t.amount, 0);
 
   const totalExpenses = transactions
-    .filter(t => new Date(t.date) <= currentDate && t.type === 'expense')
+    .filter((t) => new Date(t.date) <= currentDate && t.type === 'GASTO')
     .reduce((sum, t) => sum + t.amount, 0);
 
   const totalSavings = transactions
-    .filter(t => new Date(t.date) <= currentDate && t.type === 'saving')
+    .filter((t) => new Date(t.date) <= currentDate && t.type === 'AHORRO')
     .reduce((sum, t) => sum + t.amount, 0);
 
   // El saldo acumulado incluye todo el historial hasta la fecha seleccionada
@@ -307,13 +314,13 @@ export default function App() {
         {/* Grid de secciones */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <IncomeSection 
-            transactions={transactions.filter(t => t.type === 'income')}
+            transactions={transactions.filter(t => t.type === 'INGRESO')}
             selectedMonth={selectedMonth}
             selectedYear={selectedYear}
             onDeleteTransaction={deleteTransaction}
           />
           <ExpenseSection 
-            transactions={transactions.filter(t => t.type === 'expense')}
+            transactions={transactions.filter(t => t.type === 'GASTO')}
             selectedMonth={selectedMonth}
             selectedYear={selectedYear}
             onDeleteTransaction={deleteTransaction}
@@ -356,7 +363,9 @@ export default function App() {
       <AddTransactionDialog 
         open={isAddDialogOpen}
         onOpenChange={setIsAddDialogOpen}
-        onAddTransaction={addTransaction}
+        onAddTransaction={(tx) => {
+          addTransaction(tx);
+        }}
       />
 
       {/* Toast notifications */}

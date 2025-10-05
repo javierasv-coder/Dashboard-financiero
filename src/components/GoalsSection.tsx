@@ -74,7 +74,7 @@ export function GoalsSection({
       // Crear transacción de ahorro que se descuenta del saldo
       const goal = goals.find(g => g.id === goalId);
       addTransaction({
-        type: 'saving',
+        type: 'AHORRO',
         amount: amount,
         category: 'Meta: ' + (goal?.name || 'Meta financiera'),
         description: `Ahorro para ${goal?.name || 'meta financiera'}`,

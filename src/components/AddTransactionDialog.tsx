@@ -45,7 +45,7 @@ const savingsCategories = [
 ];
 
 export function AddTransactionDialog({ open, onOpenChange, onAddTransaction }: AddTransactionDialogProps) {
-  const [activeTab, setActiveTab] = useState<'income' | 'expense' | 'saving'>('income');
+  const [activeTab, setActiveTab] = useState<'INGRESO' | 'GASTO' | 'AHORRO'>('INGRESO');
   const [formData, setFormData] = useState({
     amount: '',
     category: '',
@@ -84,15 +84,15 @@ export function AddTransactionDialog({ open, onOpenChange, onAddTransaction }: A
 
   const getCategoriesForType = () => {
     switch (activeTab) {
-      case 'income': return incomeCategories;
-      case 'expense': return expenseCategories;
-      case 'saving': return savingsCategories;
+      case 'INGRESO': return incomeCategories;
+      case 'GASTO': return expenseCategories;
+      case 'AHORRO': return savingsCategories;
     }
   };
 
   const getTabConfig = () => {
     switch (activeTab) {
-      case 'income':
+      case 'INGRESO':
         return {
           title: 'Agregar Ingreso',
           icon: DollarSign,
@@ -100,7 +100,7 @@ export function AddTransactionDialog({ open, onOpenChange, onAddTransaction }: A
           bgColor: 'bg-emerald-50',
           buttonColor: 'bg-emerald-600 hover:bg-emerald-700'
         };
-      case 'expense':
+      case 'GASTO':
         return {
           title: 'Agregar Gasto',
           icon: TrendingDown,
@@ -108,7 +108,7 @@ export function AddTransactionDialog({ open, onOpenChange, onAddTransaction }: A
           bgColor: 'bg-red-50',
           buttonColor: 'bg-red-600 hover:bg-red-700'
         };
-      case 'saving':
+      case 'AHORRO':
         return {
           title: 'Agregar Ahorro',
           icon: PiggyBank,
@@ -134,20 +134,20 @@ export function AddTransactionDialog({ open, onOpenChange, onAddTransaction }: A
         <Tabs 
           value={activeTab} 
           onValueChange={(value) => {
-            setActiveTab(value as 'income' | 'expense' | 'saving');
+            setActiveTab(value as 'INGRESO' | 'GASTO' | 'AHORRO');
             setFormData(prev => ({ ...prev, category: '' }));
           }}
         >
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="income" className="flex items-center gap-1">
+            <TabsTrigger value="INGRESO" className="flex items-center gap-1">
               <DollarSign className="h-4 w-4" />
               Ingreso
             </TabsTrigger>
-            <TabsTrigger value="expense" className="flex items-center gap-1">
+            <TabsTrigger value="GASTO" className="flex items-center gap-1">
               <TrendingDown className="h-4 w-4" />
               Gasto
             </TabsTrigger>
-            <TabsTrigger value="saving" className="flex items-center gap-1">
+            <TabsTrigger value="AHORRO" className="flex items-center gap-1">
               <PiggyBank className="h-4 w-4" />
               Ahorro
             </TabsTrigger>
@@ -159,9 +159,9 @@ export function AddTransactionDialog({ open, onOpenChange, onAddTransaction }: A
               <div>
                 <h3 className={`${config.color}`}>{config.title}</h3>
                 <p className="text-xs text-slate-600">
-                  {activeTab === 'income' && 'Registra dinero que recibiste'}
-                  {activeTab === 'expense' && 'Registra dinero que gastaste'}
-                  {activeTab === 'saving' && 'Registra dinero que ahorraste'}
+                  {activeTab === 'INGRESO' && 'Registra dinero que recibiste'}
+                  {activeTab === 'GASTO' && 'Registra dinero que gastaste'}
+                  {activeTab === 'AHORRO' && 'Registra dinero que ahorraste'}
                 </p>
               </div>
             </div>

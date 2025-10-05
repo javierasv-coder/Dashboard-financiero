@@ -30,15 +30,15 @@ export function TrendsSection({ transactions, selectedYear }: TrendsSectionProps
       });
 
       const income = monthTransactions
-        .filter(t => t.type === 'income')
+        .filter(t => t.type === 'INGRESO')
         .reduce((sum, t) => sum + t.amount, 0);
 
       const expenses = monthTransactions
-        .filter(t => t.type === 'expense')
+        .filter(t => t.type === 'GASTO')
         .reduce((sum, t) => sum + t.amount, 0);
 
       const savings = monthTransactions
-        .filter(t => t.type === 'saving')
+        .filter(t => t.type === 'AHORRO')
         .reduce((sum, t) => sum + t.amount, 0);
 
       const balance = income - expenses - savings;
