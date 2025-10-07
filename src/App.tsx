@@ -13,6 +13,7 @@ import { Plus, DollarSign } from 'lucide-react';
 import { toast } from 'sonner@2.0.3';
 import { useGoals } from './hooks/useGoals';
 import { useTransactions } from './hooks/useTransactions'; 
+import { useFreeSavings } from './hooks/useFreeSavings';
 
 export interface Transaction {
   id: string;
@@ -65,7 +66,7 @@ export default function App() {
   const usuarioId = 1; // 👈 estático por ahora
   const {transactions, loading: loadingTransactions, addTransaction, deleteTransaction} = useTransactions(usuarioId); 
   const { goals, loading: loadingGoals, addGoal, deleteGoal, quickPayment, updateGoalAmount, useGoalSavings } = useGoals(usuarioId); 
-  const [freeSavings, setFreeSavings] = useState<number>(0);
+  const { total: freeSavings, loading: loadingFreeSavings, addFreeSaving, withdrawFreeSaving, refresh } = useFreeSavings(usuarioId);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
@@ -153,7 +154,7 @@ export default function App() {
     });
   };
   */
-  const addFreeSavings = (amount: number) => {
+  /*const addFreeSavings = (amount: number) => {
     setFreeSavings((prev) => prev + amount);
 
     // Registrar como transacción de tipo saving
@@ -202,7 +203,7 @@ export default function App() {
       }).format(amount)} del ahorro libre`,
     });
   };
-
+*/
   const handleUseGoalSavings = (goalId: string) => {
     const goal = goals.find((g) => g.id === goalId);
     if (!goal || goal.currentAmount === 0 || goal.isUsed) return;
@@ -329,14 +330,15 @@ export default function App() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <GoalsSection 
+            usuarioId={1}
             goals={goals}
             updateGoal={updateGoalAmount} // ✅ actualiza en Supabase
             onAddGoal={addGoal}
             onDeleteGoal={deleteGoal}
             addTransaction={addTransaction}
             freeSavings={freeSavings}
-            onAddFreeSavings={addFreeSavings}
-            onWithdrawFreeSavings={withdrawFreeSavings}
+            onAddFreeSavings={addFreeSaving}
+            onWithdrawFreeSavings={withdrawFreeSaving}
             onUseGoalSavings={useGoalSavings} // ✅ actualiza en Supabase
           />
 

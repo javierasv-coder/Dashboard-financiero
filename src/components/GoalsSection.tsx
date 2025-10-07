@@ -16,6 +16,11 @@ interface GoalsSectionProps {
   onDeleteGoal: (goalId: string) => void;
   addTransaction: (transaction: Omit<Transaction, 'id'>) => void;
   onUseGoalSavings: (goalId: string) => void;
+
+  // Nuevas props para ahorro libre
+  freeSavings: number;
+  onAddFreeSavings: (amount: number) => void;
+  onWithdrawFreeSavings: (amount: number) => void;
 }
 
 
@@ -25,7 +30,10 @@ export function GoalsSection({
   onAddGoal,
   onDeleteGoal,
   addTransaction,
-  onUseGoalSavings
+  onUseGoalSavings,
+  freeSavings,
+  onAddFreeSavings,
+  onWithdrawFreeSavings,
 }: GoalsSectionProps) {
   const usuarioId = 1; 
   const [contributionAmounts, setContributionAmounts] = useState<Record<string, string>>({});
@@ -33,7 +41,8 @@ export function GoalsSection({
   const [withdrawAmount, setWithdrawAmount] = useState<string>('');
   const [withdrawDescription, setWithdrawDescription] = useState<string>('');
   const [isAddGoalDialogOpen, setIsAddGoalDialogOpen] = useState(false);
-  const {total: freeSavings, addFreeSaving, withdrawFreeSaving, loading: loadingFreeSavings} = useFreeSavings(usuarioId);
+  const loadingFreeSavings = false;
+
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('es-CL', {
@@ -94,7 +103,7 @@ export function GoalsSection({
   const handleAddFreeSaving = async () => {
     const amount = parseFloat(freeSavingAmount);
     if (amount > 0) {
-      await addFreeSaving(amount);
+      await onAddFreeSavings(amount);
       setFreeSavingAmount('');
     }
   };
@@ -102,7 +111,7 @@ export function GoalsSection({
   const handleWithdrawFreeSaving = async () => {
     const amount = parseFloat(withdrawAmount);
     if (amount > 0 && withdrawDescription.trim()) {
-      await withdrawFreeSaving(amount); // ya no se guarda la descripción
+      await onWithdrawFreeSavings(amount); // ya no se guarda la descripción
       setWithdrawAmount('');
       setWithdrawDescription('');
     }
