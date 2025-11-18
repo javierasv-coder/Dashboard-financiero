@@ -4,7 +4,6 @@ import { Button } from "./ui/button";
 import { Progress } from "./ui/progress";
 import { AddBillDialog } from "./AddBillDialog";
 import { CreditCard, Plus, Calendar, DollarSign, Trash2, Zap } from "lucide-react";
-import { useBills } from "../hooks/useBills";
 
 export interface Bill {
   id: string;
@@ -17,9 +16,21 @@ export interface Bill {
   category: string;
 }
 
-export function BillsSection() {
-  const usuarioId = 1; // 👈 estático por ahora
-  const { bills, loading, addBill, deleteBill, quickPayment } = useBills(usuarioId);
+interface BillsSectionProps {
+  bills: Bill[];
+  loading: boolean;
+  addBill: (bill: Omit<Bill, 'id' | 'paidInstallments' | 'installmentAmount'>) => Promise<void>;
+  deleteBill: (id: string) => Promise<void>;
+  quickPayment: (id: string) => Promise<void>;
+}
+
+export function BillsSection({ 
+  bills, 
+  loading, 
+  addBill, 
+  deleteBill, 
+  quickPayment 
+}: BillsSectionProps) {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 
   const formatCurrency = (amount: number) =>

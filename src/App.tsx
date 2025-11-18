@@ -14,6 +14,8 @@ import { toast } from 'sonner@2.0.3';
 import { useGoals } from './hooks/useGoals';
 import { useTransactions } from './hooks/useTransactions'; 
 import { useFreeSavings } from './hooks/useFreeSavings';
+import { useBills } from './hooks/useBills';
+import type { Bill } from './components/BillsSection'; // Importamos el tipo
 
 export interface Transaction {
   id: string;
@@ -65,8 +67,9 @@ const mockGoals: Goal[] = [
 export default function App() {
   const usuarioId = 1; // 👈 estático por ahora
   const {transactions, loading: loadingTransactions, addTransaction, deleteTransaction} = useTransactions(usuarioId); 
-  const { goals, loading: loadingGoals, addGoal, deleteGoal, quickPayment, updateGoalAmount, useGoalSavings } = useGoals(usuarioId); 
+  const { goals, loading: loadingGoals, addGoal, deleteGoal, quickPayment: quickPaymentGoal, updateGoalAmount, useGoalSavings } = useGoals(usuarioId); // Renombré quickPayment a quickPaymentGoal para evitar colisión
   const { total: freeSavings, loading: loadingFreeSavings, addFreeSaving, withdrawFreeSaving, refresh } = useFreeSavings(usuarioId);
+  const { bills, loading: loadingBills, addBill, deleteBill, quickPayment } = useBills(usuarioId);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
@@ -249,7 +252,7 @@ export default function App() {
     .reduce((sum, t) => sum + t.amount, 0);
 
   const monthlySavings = currentMonthTransactions
-    .filter((t) => t.type === 'AHORRO')
+    .filter((t) => t.type === 'GASTO' && t.category === 'Ahorro')
     .reduce((sum, t) => sum + t.amount, 0);
 
   // Calcular saldo acumulado (de todos los meses hasta la fecha)
@@ -275,6 +278,14 @@ export default function App() {
   // Calcular ahorros totales por categorías
   const totalGoalSavings = goals.reduce((sum, goal) => sum + goal.currentAmount, 0);
   const totalAccumulatedSavings = totalSavings + freeSavings;
+
+  const totalPendingDebt = bills.reduce((acc, bill) => {
+    if (bill.paidInstallments >= bill.installments) {
+     return acc;
+    }
+    const remainingAmount = (bill.installments - bill.paidInstallments) * bill.installmentAmount;
+    return acc + (remainingAmount > 0 ? remainingAmount : 0);
+  }, 0);
 
   return (
     <div className="min-h-screen bg-slate-50 p-6">
@@ -306,7 +317,7 @@ export default function App() {
           monthlyExpenses={monthlyExpenses}
           monthlySavings={monthlySavings}
           savingsRate={savingsRate}
-          debt={0}
+          debt={totalPendingDebt}
           totalAccumulatedSavings={totalAccumulatedSavings}
           goalSavings={totalGoalSavings}
           freeSavings={freeSavings}
@@ -343,7 +354,13 @@ export default function App() {
           />
 
 
-          <BillsSection />
+          <BillsSection 
+            bills={bills}
+            loading={loadingBills}
+            addBill={addBill}
+            deleteBill={deleteBill}
+            quickPayment={quickPayment}
+          />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

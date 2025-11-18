@@ -147,7 +147,7 @@ export function AddTransactionDialog({ open, onOpenChange, onAddTransaction }: A
               <TrendingDown className="h-4 w-4" />
               Gasto
             </TabsTrigger>
-            <TabsTrigger value="AHORRO" className="flex items-center gap-1">
+            <TabsTrigger value="AHORRO" className="flex items-center gap-1" disabled>
               <PiggyBank className="h-4 w-4" />
               Ahorro
             </TabsTrigger>

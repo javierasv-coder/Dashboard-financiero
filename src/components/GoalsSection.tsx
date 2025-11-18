@@ -39,7 +39,7 @@ export function GoalsSection({
   const [contributionAmounts, setContributionAmounts] = useState<Record<string, string>>({});
   const [freeSavingAmount, setFreeSavingAmount] = useState<string>('');
   const [withdrawAmount, setWithdrawAmount] = useState<string>('');
-  const [withdrawDescription, setWithdrawDescription] = useState<string>('');
+  //const [withdrawDescription, setWithdrawDescription] = useState<string>('');
   const [isAddGoalDialogOpen, setIsAddGoalDialogOpen] = useState(false);
   const loadingFreeSavings = false;
 
@@ -110,10 +110,9 @@ export function GoalsSection({
 
   const handleWithdrawFreeSaving = async () => {
     const amount = parseFloat(withdrawAmount);
-    if (amount > 0 && withdrawDescription.trim()) {
+    if (amount > 0 ) {
       await onWithdrawFreeSavings(amount); // ya no se guarda la descripción
       setWithdrawAmount('');
-      setWithdrawDescription('');
     }
   };
 
@@ -331,19 +330,12 @@ export function GoalsSection({
                       className="flex-1 h-8 text-sm"
                       max={freeSavings}
                     />
-                    <Input
-                      type="text"
-                      placeholder="Motivo del retiro"
-                      value={withdrawDescription}
-                      onChange={(e) => setWithdrawDescription(e.target.value)}
-                      className="flex-1 h-8 text-sm"
-                    />
                   </div>
                   <Button
                     size="sm"
                     onClick={handleWithdrawFreeSaving}
                     className="bg-red-600 hover:bg-red-700 text-white h-8 px-3"
-                    disabled={!withdrawAmount || !withdrawDescription.trim()}
+                    disabled={!withdrawAmount || parseFloat(withdrawAmount) <= 0}
                   >
                     <Minus className="h-3 w-3 mr-1" />
                     Retirar
