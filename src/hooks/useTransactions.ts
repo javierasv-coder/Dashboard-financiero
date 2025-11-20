@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabaseClient";
 import { Transaction } from "../App";
 
-export function useTransactions(usuarioId: number) {
+export function useTransactions(usuarioId: string) {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -37,7 +37,7 @@ export function useTransactions(usuarioId: number) {
       .from("transacciones")
       .insert([
         {
-          usuario_id: 1, // 👈 estático por ahora
+          usuario_id: usuarioId, 
           tipo: transaction.type,
           monto: transaction.amount,
           categoria: transaction.category,

@@ -6,7 +6,7 @@ export interface FreeSavingEntry {
   amount: number;
 }
 
-export function useFreeSavings(usuarioId: number) {
+export function useFreeSavings(usuarioId: string) {
   const [entries, setEntries] = useState<FreeSavingEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);

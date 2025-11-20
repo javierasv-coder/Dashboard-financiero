@@ -1,4 +1,6 @@
 import React, { use, useState } from 'react';
+import { AuthProvider, useAuth } from './contexts/AuthContext'; // Importar contexto
+import { LoginPage } from './components/LoginPage'; // Importar Login
 import { FinancialSummary } from './components/FinancialSummary';
 import { IncomeSection } from './components/IncomeSection';
 import { ExpenseSection } from './components/ExpenseSection';
@@ -9,7 +11,7 @@ import { BillsSection } from './components/BillsSection';
 import { AddTransactionDialog } from './components/AddTransactionDialog';
 import { Button } from './components/ui/button';
 import { Toaster } from './components/ui/sonner';
-import { Plus, DollarSign } from 'lucide-react';
+import { Plus, DollarSign, LogOut } from 'lucide-react';
 import { toast } from 'sonner@2.0.3';
 import { useGoals } from './hooks/useGoals';
 import { useTransactions } from './hooks/useTransactions'; 
@@ -64,8 +66,9 @@ const mockGoals: Goal[] = [
   { id: '4', name: 'Laptop Nueva', targetAmount: 2000, currentAmount: 2000, targetDate: '2025-01-15', category: 'Tecnología', isUsed: true, description: '' },
 ];
 
-export default function App() {
-  const usuarioId = 1; // 👈 estático por ahora
+function Dashboard(){
+  const { user, signOut } = useAuth();
+  const usuarioId = user?.id || '';
   const {transactions, loading: loadingTransactions, addTransaction, deleteTransaction} = useTransactions(usuarioId); 
   const { goals, loading: loadingGoals, addGoal, deleteGoal, quickPayment: quickPaymentGoal, updateGoalAmount, useGoalSavings } = useGoals(usuarioId); // Renombré quickPayment a quickPaymentGoal para evitar colisión
   const { total: freeSavings, loading: loadingFreeSavings, addFreeSaving, withdrawFreeSaving, refresh } = useFreeSavings(usuarioId);
@@ -74,139 +77,6 @@ export default function App() {
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
-  
-  /*const addTransaction = (transaction: Omit<Transaction, 'id'>) => {
-    const newTransaction = {
-      ...transaction,
-      id: Date.now().toString(),
-    };
-    setTransactions(prev => [...prev, newTransaction]);
-  };
-
-  const deleteTransaction = (transactionId: string) => {
-    setTransactions(prev => prev.filter(t => t.id !== transactionId));
-  };*/
-
-
-  /*
-  const addGoal = (goal: Omit<Goal, 'id' | 'currentAmount' | 'isUsed'>) => {
-    const newGoal = {
-      ...goal,
-      id: Date.now().toString(),
-      currentAmount: 0,
-      isUsed: false,
-    };
-    setGoals(prev => [...prev, newGoal]);
-  };
-
-  const updateGoal = (goalId: string, amount: number) => {
-    setGoals(prev => prev.map(goal => 
-      goal.id === goalId 
-        ? { ...goal, currentAmount: goal.currentAmount + amount }
-        : goal
-    ));
-  };
-
-  const deleteGoal = (goalId: string) => {
-    setGoals(prev => prev.filter(g => g.id !== goalId));
-  };*/
-  /*
-  const addBill = (bill: Omit<Bill, 'id' | 'paidInstallments' | 'installmentAmount'>) => {
-    const installmentAmount = bill.totalAmount / bill.installments;
-    const newBill: Bill = {
-      ...bill,
-      id: Date.now().toString(),
-      paidInstallments: 0,
-      installmentAmount: installmentAmount,
-    };
-    setBills(prev => [...prev, newBill]);
-  };
-
-  const deleteBill = (billId: string) => {
-    setBills(prev => prev.filter(b => b.id !== billId));
-  };
-
-  const handleQuickPayment = (billId: string) => {
-    const bill = bills.find(b => b.id === billId);
-    if (!bill || bill.paidInstallments >= bill.installments) return;
-
-    // Actualizar la cuenta (incrementar cuotas pagadas)
-    setBills(prev => prev.map(b => 
-      b.id === billId 
-        ? { ...b, paidInstallments: b.paidInstallments + 1 }
-        : b
-    ));
-
-    // Agregar automáticamente como gasto
-    const quickExpense: Omit<Transaction, 'id'> = {
-      type: 'expense',
-      amount: bill.installmentAmount,
-      category: 'Pago de Cuenta',
-      description: `Pago rápido - ${bill.name}`,
-      date: new Date().toISOString().split('T')[0],
-    };
-
-    addTransaction(quickExpense);
-
-    // Mostrar notificación de éxito
-    toast.success(`Pago realizado exitosamente`, {
-      description: `Se descontaron ${new Intl.NumberFormat('es-CL', {
-        style: 'currency',
-        currency: 'CLP',
-      }).format(bill.installmentAmount)} de ${bill.name}`,
-    });
-  };
-  */
-  /*const addFreeSavings = (amount: number) => {
-    setFreeSavings((prev) => prev + amount);
-
-    // Registrar como transacción de tipo saving
-    const savingTransaction: Omit<Transaction, 'id'> = {
-      type: 'AHORRO',
-      amount,
-      category: 'Ahorro Libre',
-      description: 'Ahorro libre (sin meta específica)',
-      date: new Date().toISOString().split('T')[0],
-    };
-    addTransaction(savingTransaction);
-
-    toast.success('Ahorro agregado exitosamente', {
-      description: `Se agregaron ${new Intl.NumberFormat('es-CL', {
-        style: 'currency',
-        currency: 'CLP',
-      }).format(amount)} al ahorro libre`,
-    });
-  };
-
-  const withdrawFreeSavings = (amount: number, description: string) => {
-    if (amount > freeSavings) {
-      toast.error('Fondos insuficientes', {
-        description: 'No tienes suficiente ahorro libre para este retiro',
-      });
-      return;
-    }
-
-    setFreeSavings(prev => prev - amount);
-    
-    // Registrar como gasto
-    const expenseTransaction: Omit<Transaction, 'id'> = {
-      type: 'GASTO',
-      amount: amount,
-      category: 'Retiro de Ahorro',
-      description: `Retiro de ahorro libre: ${description}`,
-      date: new Date().toISOString().split('T')[0],
-    };
-    
-    addTransaction(expenseTransaction);
-
-    toast.success('Retiro realizado exitosamente', {
-      description: `Se retiraron ${new Intl.NumberFormat('es-CL', {
-        style: 'currency',
-        currency: 'CLP',
-      }).format(amount)} del ahorro libre`,
-    });
-  };
-*/
   const handleUseGoalSavings = (goalId: string) => {
     const goal = goals.find((g) => g.id === goalId);
     if (!goal || goal.currentAmount === 0 || goal.isUsed) return;
@@ -298,16 +168,21 @@ export default function App() {
             </div>
             <div>
               <h1 className="text-2xl text-slate-900">Dashboard Financiero</h1>
-              <p className="text-slate-600">Gestiona tus finanzas personales</p>
+              <p className="text-slate-600 text-xs">Usuario: {user?.email}</p>
             </div>
           </div>
-          <Button 
-            onClick={() => setIsAddDialogOpen(true)}
-            className="bg-emerald-600 hover:bg-emerald-700 text-white"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Agregar Transacción
-          </Button>
+          <div className="flex gap-2">
+             <Button 
+              onClick={() => setIsAddDialogOpen(true)}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Agregar Transacción
+            </Button>
+            <Button variant="outline" onClick={signOut}>
+              <LogOut className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
 
         {/* Resumen Financiero */}
@@ -341,7 +216,7 @@ export default function App() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <GoalsSection 
-            usuarioId={1}
+            usuarioId={usuarioId as unknown as number}
             goals={goals}
             updateGoal={updateGoalAmount} // ✅ actualiza en Supabase
             onAddGoal={addGoal}
@@ -390,5 +265,35 @@ export default function App() {
       {/* Toast notifications */}
       <Toaster />
     </div>
+  );  
+
+}
+
+
+export default function App() {
+  return (
+    <AuthProvider>
+       <AppContent />
+    </AuthProvider>
   );
+}
+
+// Sub-componente para manejar la lógica de visualización
+function AppContent() {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center">Cargando...</div>;
+  }
+
+  if (!user) {
+    return (
+        <>
+            <LoginPage />
+            <Toaster />
+        </>
+    );
+  }
+
+  return <Dashboard />;
 }

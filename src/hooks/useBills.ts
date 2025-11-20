@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabaseClient";
 import { Bill } from "../components/BillsSection";
 
-export function useBills(usuarioId: number) {
+export function useBills(usuarioId: string) {
   const [bills, setBills] = useState<Bill[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -101,7 +101,7 @@ export function useBills(usuarioId: number) {
     const bill_name = bill.name; // Guardar el nombre de la cuenta antes de la actualización
     const { error: transactionError } = await supabase.from("transacciones").insert([
       {
-        usuario_id: 1, // 👈 estático por ahora
+        usuario_id: usuarioId, // 👈 estático por ahora
         tipo: "GASTO",
         monto: bill.installmentAmount,
         categoria: "Pago de Cuenta",
