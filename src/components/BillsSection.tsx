@@ -4,6 +4,7 @@ import { Button } from "./ui/button";
 import { Progress } from "./ui/progress";
 import { AddBillDialog } from "./AddBillDialog";
 import { CreditCard, Plus, Calendar, DollarSign, Trash2, Zap } from "lucide-react";
+import { Transaction } from "../App";
 
 export interface Bill {
   id: string;
@@ -21,7 +22,8 @@ interface BillsSectionProps {
   loading: boolean;
   addBill: (bill: Omit<Bill, 'id' | 'paidInstallments' | 'installmentAmount'>) => Promise<void>;
   deleteBill: (id: string) => Promise<void>;
-  quickPayment: (id: string) => Promise<void>;
+  quickPayment: (id: string) => Promise<{ amount: number; name: string; newInstallmentCount: number; totalInstallments: number } | null | undefined>;
+  addTransaction: (transaction: Omit<Transaction, 'id'>) => void;
 }
 
 export function BillsSection({ 
@@ -29,7 +31,8 @@ export function BillsSection({
   loading, 
   addBill, 
   deleteBill, 
-  quickPayment 
+  quickPayment,
+  addTransaction 
 }: BillsSectionProps) {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 
@@ -38,6 +41,25 @@ export function BillsSection({
 
   const formatDate = (date: string) =>
     new Date(date).toLocaleDateString("es-CL", { day: "numeric", month: "short" });
+
+  // 🟢 Nueva función interna para manejar el pago
+  const handleQuickPaymentClick = async (id: string) => {
+    // 1. Llamamos al hook que actualiza la BD de cuentas
+    const paymentDetails = await quickPayment(id);
+
+    // 2. Si salió bien, creamos la transacción en el frontend para actualización inmediata
+    if (paymentDetails) {
+      await addTransaction({
+        type: 'GASTO',
+        amount: paymentDetails.amount,
+        category: 'Pago de Cuenta',
+        description: `PAGO CUOTA ${paymentDetails.newInstallmentCount}/${paymentDetails.totalInstallments} - ${paymentDetails.name.toUpperCase()}`,
+        date: new Date().toISOString(),
+        // meta_id: null,
+        // cuenta_pendiente_id: id (Si quieres linkearlo en el futuro, agrega esto a la interfaz Transaction)
+      });
+    }
+  };
 
   return (
     <Card>
@@ -112,7 +134,7 @@ export function BillsSection({
                     </div>
                     {bill.paidInstallments < bill.installments && (
                       <Button
-                        onClick={() => quickPayment(bill.id)}
+                        onClick={() => handleQuickPaymentClick(bill.id)}
                         size="sm"
                         className="bg-emerald-600 hover:bg-emerald-700 text-white"
                       >

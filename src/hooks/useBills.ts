@@ -36,7 +36,7 @@ export function useBills(usuarioId: string) {
   };
 
   const addBill = async (bill: Omit<Bill, "id" | "paidInstallments" | "installmentAmount">) => {
-    const montoCuota = bill.totalAmount / bill.installments;
+    const montoCuota = Math.round(bill.totalAmount / bill.installments);
 
     const { data, error } = await supabase
       .from("cuentas_pendientes")
@@ -74,49 +74,36 @@ export function useBills(usuarioId: string) {
 
   const quickPayment = async (id: string) => {
     const bill = bills.find((b) => b.id === id);
-    if (!bill) return;
-
-    // Si ya está completamente pagado, salir
-    if (bill.paidInstallments >= bill.installments) return;
+    if (!bill) return null;
+    if (bill.paidInstallments >= bill.installments) return null;
 
     const newPaidInstallments = bill.paidInstallments + 1;
     const isFullyPaid = newPaidInstallments === bill.installments;
 
-    // 1. Actualiza la cuenta con la nueva cuota pagada
+    // 1. Actualiza la cuenta en la BD
     const { error: updateError } = await supabase
       .from("cuentas_pendientes")
       .update({
         pagado: isFullyPaid,
-        // Aquí almacenamos el nuevo valor de cuotas pagadas (suponiendo que lo agregas a la tabla)
         cuotas_pagadas: newPaidInstallments,
       })
       .eq("id", id);
 
     if (updateError) {
       console.error("Error actualizando cuota:", updateError);
-      return;
+      return null;
     }
-
-    // 2. Inserta una transacción de gasto en la tabla "transacciones"
-    const bill_name = bill.name; // Guardar el nombre de la cuenta antes de la actualización
-    const { error: transactionError } = await supabase.from("transacciones").insert([
-      {
-        usuario_id: usuarioId, // 👈 estático por ahora
-        tipo: "GASTO",
-        monto: bill.installmentAmount,
-        categoria: "Pago de Cuenta",
-        descripcion: `PAGO DE CUOTA ${newPaidInstallments}/${bill.installments} PARA ${bill.name.toUpperCase()}`,
-        fecha: new Date().toISOString(),
-        cuenta_pendiente_id: id,
-      },
-    ]);
-
-    if (transactionError) {
-      console.error("Error creando transacción:", transactionError);
-    }
-
-    // 3. Refresca los datos
+    
+    // Refrescamos la lista local de cuentas
     fetchBills();
+
+    // Devolvemos los datos necesarios para que el Frontend cree la transacción
+    return {
+      amount: bill.installmentAmount,
+      name: bill.name,
+      newInstallmentCount: newPaidInstallments,
+      totalInstallments: bill.installments
+    };
   };
 
 
