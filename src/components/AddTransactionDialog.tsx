@@ -71,7 +71,7 @@ export function AddTransactionDialog({ open, onOpenChange, onAddTransaction }: A
 
     const transaction: Omit<Transaction, 'id'> = {
       type: activeTab,
-      amount: parseFloat(formData.amount),
+      amount: parseInt(formData.amount),
       category: formData.category,
       description: formData.description,
       date: formData.date
@@ -172,10 +172,16 @@ export function AddTransactionDialog({ open, onOpenChange, onAddTransaction }: A
                 <Input
                   id="amount"
                   type="number"
-                  step="0.01"
-                  placeholder="0.00"
+                  step="1"
+                  min="1"
+                  placeholder="0"
                   value={formData.amount}
                   onChange={(e) => setFormData(prev => ({ ...prev, amount: e.target.value }))}
+                  onKeyDown={(e) => {
+                    if (["-", "+", "e", "E", ".", ","].includes(e.key)) {
+                      e.preventDefault();
+                    }
+                  }}
                   required
                 />
               </div>

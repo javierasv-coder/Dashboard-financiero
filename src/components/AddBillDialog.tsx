@@ -40,7 +40,7 @@ export function AddBillDialog({ open, onOpenChange, onAddBill }: AddBillDialogPr
       return;
     }
 
-    const totalAmount = parseFloat(formData.totalAmount);
+    const totalAmount = parseInt(formData.totalAmount);
     const installments = parseInt(formData.installments);
     
     onAddBill({
@@ -104,11 +104,16 @@ export function AddBillDialog({ open, onOpenChange, onAddBill }: AddBillDialogPr
               <Input
                 id="totalAmount"
                 type="number"
-                step="0.01"
-                min="0"
-                placeholder="0.00"
+                step="1"
+                min="1"
+                placeholder="0"
                 value={formData.totalAmount}
                 onChange={(e) => handleChange('totalAmount', e.target.value)}
+                onKeyDown={(e) => {
+                  if (["-", "+", "e", "E", ".", ","].includes(e.key)) {
+                    e.preventDefault();
+                  }
+                }}
                 required
               />
             </div>
@@ -118,9 +123,15 @@ export function AddBillDialog({ open, onOpenChange, onAddBill }: AddBillDialogPr
                 id="installments"
                 type="number"
                 min="1"
+                step="1"
                 placeholder="12"
                 value={formData.installments}
                 onChange={(e) => handleChange('installments', e.target.value)}
+                onKeyDown={(e) => {
+                  if (["-", "+", "e", "E", ".", ","].includes(e.key)) {
+                    e.preventDefault();
+                  }
+                }}
                 required
               />
             </div>

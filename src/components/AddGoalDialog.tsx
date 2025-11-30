@@ -55,7 +55,7 @@ export function AddGoalDialog({ open, onOpenChange, onAddGoal }: AddGoalDialogPr
 
     const goal: Omit<Goal, 'id' | 'currentAmount'> = {
       name: formData.name,
-      targetAmount: parseFloat(formData.targetAmount),
+      targetAmount: parseInt(formData.targetAmount),
       targetDate: formData.targetDate,
       category: formData.category,
       description: formData.description
@@ -127,11 +127,17 @@ export function AddGoalDialog({ open, onOpenChange, onAddGoal }: AddGoalDialogPr
                 <Input
                   id="targetAmount"
                   type="number"
-                  step="0.01"
-                  placeholder="0.00"
+                  step="1"
+                  min="1"
+                  placeholder="0"
                   className="pl-10"
                   value={formData.targetAmount}
                   onChange={(e) => setFormData(prev => ({ ...prev, targetAmount: e.target.value }))}
+                  onKeyDown={(e) => {
+                    if (["-", "+", "e", "E", ".", ","].includes(e.key)) {
+                      e.preventDefault();
+                    }
+                  }}
                   required
                 />
               </div>

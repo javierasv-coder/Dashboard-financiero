@@ -76,7 +76,7 @@ export function GoalsSection({
 
 
   const handleContribution = async (goalId: string) => {
-    const amount = parseFloat(contributionAmounts[goalId] || '0');
+    const amount = parseInt(contributionAmounts[goalId] || '0');
     if (amount > 0) {
       // 1. Buscar la meta actual para obtener datos
       const goal = goals.find(g => g.id === goalId);
@@ -118,7 +118,7 @@ export function GoalsSection({
   };
 
   const handleAddFreeSaving = async () => {
-    const amount = parseFloat(freeSavingAmount);
+    const amount = parseInt(freeSavingAmount);
     if (amount > 0) {
       // 1. Actualizar la tabla 'ahorro_libre' (Aumentar el saldo)
       await onAddFreeSavings(amount);
@@ -140,7 +140,7 @@ export function GoalsSection({
   };
 
   const handleWithdrawFreeSaving = async () => {
-    const amount = parseFloat(withdrawAmount);
+    const amount = parseInt(withdrawAmount);
 
     if (amount > freeSavings) {
       toast.error("Fondos insuficientes", {
@@ -270,12 +270,19 @@ export function GoalsSection({
                     <div className="flex gap-2">
                       <Input
                         type="number"
+                        step="1"
+                        min="1"
                         placeholder="Cantidad a ahorrar"
                         value={contributionAmounts[goal.id] || ''}
                         onChange={(e) => setContributionAmounts(prev => ({
                           ...prev,
                           [goal.id]: e.target.value
                         }))}
+                        onKeyDown={(e) => {
+                          if (["-", "+", "e", "E", ".", ","].includes(e.key)) {
+                            e.preventDefault();
+                          }
+                        }}
                         className="flex-1 h-8 text-sm"
                       />
                       <Button
@@ -354,9 +361,16 @@ export function GoalsSection({
               <div className="flex gap-2">
                 <Input
                   type="number"
+                  step="1"
+                  min="1"
                   placeholder="Cantidad a ahorrar"
                   value={freeSavingAmount}
                   onChange={(e) => setFreeSavingAmount(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (["-", "+", "e", "E", ".", ","].includes(e.key)) {
+                      e.preventDefault();
+                    }
+                  }}
                   className="flex-1 h-8 text-sm"
                 />
                 <Button
@@ -379,9 +393,16 @@ export function GoalsSection({
                   <div className="flex gap-2">
                     <Input
                       type="number"
+                      step="1"
+                      min="1"
                       placeholder="Cantidad"
                       value={withdrawAmount}
                       onChange={(e) => setWithdrawAmount(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (["-", "+", "e", "E", ".", ","].includes(e.key)) {
+                          e.preventDefault();
+                        }
+                      }}
                       className="flex-1 h-8 text-sm"
                       max={freeSavings}
                     />
