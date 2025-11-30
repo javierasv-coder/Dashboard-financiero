@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis } from 'recharts';
-import { TrendingDown, CreditCard, Trash2 } from 'lucide-react';
+import { TrendingDown, CreditCard, Trash2, Plus } from 'lucide-react';
 import { Transaction } from '../App';
 
 interface ExpenseSectionProps {
@@ -10,11 +10,12 @@ interface ExpenseSectionProps {
   selectedMonth: number;
   selectedYear: number;
   onDeleteTransaction: (transactionId: string) => void;
+  onQuickAdd: () => void;
 }
 
 const COLORS = ['#ef4444', '#f97316', '#eab308', '#22c55e', '#3b82f6', '#8b5cf6', '#ec4899'];
 
-export function ExpenseSection({ transactions, selectedMonth, selectedYear, onDeleteTransaction }: ExpenseSectionProps) {
+export function ExpenseSection({ transactions, selectedMonth, selectedYear, onDeleteTransaction, onQuickAdd }: ExpenseSectionProps) {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('es-CL', {
       style: 'currency',
@@ -81,10 +82,20 @@ export function ExpenseSection({ transactions, selectedMonth, selectedYear, onDe
   return (
     <Card className="border-0 shadow-sm">
       <CardHeader className="pb-4">
-        <CardTitle className="flex items-center gap-2 text-red-700">
-          <TrendingDown className="h-5 w-5" />
-          Gastos
-        </CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center gap-2 text-red-700">
+            <TrendingDown className="h-5 w-5" />
+            Gastos
+          </CardTitle>
+          <Button 
+            size="sm" 
+            onClick={onQuickAdd} 
+            className="bg-red-600 hover:bg-red-700 text-white shadow-sm"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Agregar Gasto
+          </Button>
+        </div>
         <p className="text-2xl text-red-600">{formatCurrency(totalMonthlyExpenses)}</p>
         <p className="text-sm text-slate-600">Total del mes actual</p>
       </CardHeader>

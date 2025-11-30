@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -13,6 +13,7 @@ interface AddTransactionDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onAddTransaction: (transaction: Omit<Transaction, 'id'>) => void;
+  defaultTab?: 'INGRESO' | 'GASTO' | 'AHORRO';
 }
 
 const incomeCategories = [
@@ -44,14 +45,26 @@ const savingsCategories = [
   'Otros'
 ];
 
-export function AddTransactionDialog({ open, onOpenChange, onAddTransaction }: AddTransactionDialogProps) {
-  const [activeTab, setActiveTab] = useState<'INGRESO' | 'GASTO' | 'AHORRO'>('INGRESO');
+export function AddTransactionDialog({ 
+  open, 
+  onOpenChange, 
+  onAddTransaction, 
+  defaultTab = 'INGRESO' 
+}: AddTransactionDialogProps) {
+  
+  const [activeTab, setActiveTab] = useState<'INGRESO' | 'GASTO' | 'AHORRO'>(defaultTab);
   const [formData, setFormData] = useState({
     amount: '',
     category: '',
     description: '',
     date: new Date().toISOString().split('T')[0]
   });
+
+  useEffect(() => {
+    if (open) {
+      setActiveTab(defaultTab);
+    }
+  }, [open, defaultTab]);
 
   const resetForm = () => {
     setFormData({
@@ -168,12 +181,12 @@ export function AddTransactionDialog({ open, onOpenChange, onAddTransaction }: A
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="amount">Cantidad</Label>
+                <Label htmlFor="amount">Cantidad *</Label>
                 <Input
                   id="amount"
                   type="number"
                   step="1"
-                  min="1"
+                  min="0"
                   placeholder="0"
                   value={formData.amount}
                   onChange={(e) => setFormData(prev => ({ ...prev, amount: e.target.value }))}
@@ -187,7 +200,7 @@ export function AddTransactionDialog({ open, onOpenChange, onAddTransaction }: A
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="category">Categoría</Label>
+                <Label htmlFor="category">Categoría *</Label>
                 <Select 
                   value={formData.category} 
                   onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}
@@ -207,7 +220,7 @@ export function AddTransactionDialog({ open, onOpenChange, onAddTransaction }: A
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="description">Descripción</Label>
+                <Label htmlFor="description">Descripción *</Label>
                 <Textarea
                   id="description"
                   placeholder="Describe la transacción..."
@@ -219,7 +232,7 @@ export function AddTransactionDialog({ open, onOpenChange, onAddTransaction }: A
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="date">Fecha</Label>
+                <Label htmlFor="date">Fecha *</Label>
                 <Input
                   id="date"
                   type="date"

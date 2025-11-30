@@ -33,12 +33,21 @@ export function TrendsSection({ transactions, selectedYear }: TrendsSectionProps
         .filter(t => t.type === 'INGRESO')
         .reduce((sum, t) => sum + t.amount, 0);
 
-      const expenses = monthTransactions
-        .filter(t => t.type === 'GASTO')
+      // CORRECCIÓN: Calcular ahorros incluyendo GASTOS con categoría 'Ahorro' o 'Meta'
+      const savings = monthTransactions
+        .filter(t => 
+          t.type === 'AHORRO' || 
+          (t.type === 'GASTO' && (t.category === 'Ahorro' || t.category === 'Meta'))
+        )
         .reduce((sum, t) => sum + t.amount, 0);
 
-      const savings = monthTransactions
-        .filter(t => t.type === 'AHORRO')
+      // CORRECCIÓN: Calcular gastos EXCLUYENDO lo que ya se contó como ahorro
+      const expenses = monthTransactions
+        .filter(t => 
+          t.type === 'GASTO' && 
+          t.category !== 'Ahorro' && 
+          t.category !== 'Meta'
+        )
         .reduce((sum, t) => sum + t.amount, 0);
 
       const balance = income - expenses - savings;
@@ -127,10 +136,10 @@ export function TrendsSection({ transactions, selectedYear }: TrendsSectionProps
                   tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
                 />
                 <Tooltip 
+                  // CORRECCIÓN: Usar directamente el nombre de la serie
                   formatter={(value: number, name: string) => [
                     formatCurrency(value), 
-                    name === 'income' ? 'Ingresos' : 
-                    name === 'expenses' ? 'Gastos' : 'Ahorros'
+                    name
                   ]}
                   labelStyle={{ color: '#374151' }}
                   contentStyle={{ 
@@ -190,9 +199,10 @@ export function TrendsSection({ transactions, selectedYear }: TrendsSectionProps
                   tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
                 />
                 <Tooltip 
+                  // CORRECCIÓN: Lógica corregida para identificar positivo/negativo por nombre
                   formatter={(value: number, name: string) => [
                     formatCurrency(value), 
-                    name === 'balancePositive' ? 'Balance positivo' : 'Balance negativo'
+                    name === 'Positivo' ? 'Balance positivo' : 'Balance negativo'
                   ]}
                   contentStyle={{ 
                     backgroundColor: 'white', 

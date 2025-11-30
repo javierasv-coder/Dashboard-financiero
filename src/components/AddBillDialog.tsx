@@ -87,7 +87,7 @@ export function AddBillDialog({ open, onOpenChange, onAddBill }: AddBillDialogPr
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Nombre de la Cuenta</Label>
+            <Label htmlFor="name">Nombre de la Cuenta *</Label>
             <Input
               id="name"
               type="text"
@@ -100,12 +100,12 @@ export function AddBillDialog({ open, onOpenChange, onAddBill }: AddBillDialogPr
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="totalAmount">Monto Total</Label>
+              <Label htmlFor="totalAmount">Monto Total *</Label>
               <Input
                 id="totalAmount"
                 type="number"
                 step="1"
-                min="1"
+                min="0"
                 placeholder="0"
                 value={formData.totalAmount}
                 onChange={(e) => handleChange('totalAmount', e.target.value)}
@@ -118,7 +118,7 @@ export function AddBillDialog({ open, onOpenChange, onAddBill }: AddBillDialogPr
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="installments">Número de Cuotas</Label>
+              <Label htmlFor="installments">Número de Cuotas *</Label>
               <Input
                 id="installments"
                 type="number"
@@ -151,7 +151,7 @@ export function AddBillDialog({ open, onOpenChange, onAddBill }: AddBillDialogPr
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="dueDate">Fecha de Vencimiento de Próxima Cuota</Label>
+            <Label htmlFor="dueDate">Fecha de Vencimiento de Próxima Cuota *</Label>
             <Input
               id="dueDate"
               type="date"
@@ -162,7 +162,7 @@ export function AddBillDialog({ open, onOpenChange, onAddBill }: AddBillDialogPr
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="category">Categoría</Label>
+            <Label htmlFor="category">Categoría *</Label>
             <Select value={formData.category} onValueChange={(value) => handleChange('category', value)}>
               <SelectTrigger>
                 <SelectValue placeholder="Selecciona una categoría" />

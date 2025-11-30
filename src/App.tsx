@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { LoginPage } from './components/LoginPage';
 import { FinancialSummary } from './components/FinancialSummary';
+import { SavingsSection } from './components/SavingsSection';
 import { IncomeSection } from './components/IncomeSection';
 import { ExpenseSection } from './components/ExpenseSection';
 import { GoalsSection } from './components/GoalsSection';
@@ -52,6 +53,7 @@ function Dashboard() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [initialTab, setInitialTab] = useState<'INGRESO' | 'GASTO' | 'AHORRO'>('INGRESO');
 
   // --- CÁLCULOS ---
 
@@ -86,6 +88,11 @@ function Dashboard() {
     .reduce((sum, t) => sum + t.amount, 0);
 
   const savingsRate = monthlyIncome > 0 ? (monthlySavings / monthlyIncome) * 100 : 0;
+
+  const handleQuickAdd = (tab: 'INGRESO' | 'GASTO') => {
+    setInitialTab(tab);
+    setIsAddDialogOpen(true);
+  };
   
   // 3. Otros Totales Globales
   const totalGoalSavings = goals.reduce((sum, goal) => sum + goal.currentAmount, 0);
@@ -118,7 +125,7 @@ function Dashboard() {
               className="bg-emerald-600 hover:bg-emerald-700 text-white"
             >
               <Plus className="h-4 w-4 mr-2" />
-              Agregar
+              Agregar Transacción
             </Button>
             <Button variant="outline" onClick={signOut} title="Cerrar Sesión">
               <LogOut className="h-4 w-4" />
@@ -133,10 +140,21 @@ function Dashboard() {
           monthlySavings={monthlySavings}
           savingsRate={savingsRate}
           debt={totalPendingDebt}
-          totalAccumulatedSavings={totalAccumulatedSavings}
-          goalSavings={totalGoalSavings}
-          freeSavings={freeSavings}
+          
         />
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <SavingsSection 
+            totalAccumulatedSavings={totalAccumulatedSavings}
+            goalSavings={totalGoalSavings}
+            freeSavings={freeSavings}
+          />
+          <AlertsSection 
+            monthlyExpenses={monthlyExpenses}
+            monthlyIncome={monthlyIncome}
+            goals={goals}
+          />
+        </div>
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
              <IncomeSection 
@@ -144,12 +162,14 @@ function Dashboard() {
                 selectedMonth={selectedMonth}
                 selectedYear={selectedYear}
                 onDeleteTransaction={deleteTransaction}
+                onQuickAdd={() => handleQuickAdd('INGRESO')}
               />
               <ExpenseSection 
                 transactions={transactions.filter(t => t.type === 'GASTO')}
                 selectedMonth={selectedMonth}
                 selectedYear={selectedYear}
                 onDeleteTransaction={deleteTransaction}
+                onQuickAdd={() => handleQuickAdd('GASTO')}
               />
         </div>
 
@@ -175,14 +195,6 @@ function Dashboard() {
                 addTransaction={addTransaction}
             />
         </div>
-        
-         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <AlertsSection 
-            monthlyExpenses={monthlyExpenses}
-            monthlyIncome={monthlyIncome}
-            goals={goals}
-          />
-        </div>
 
         <TrendsSection transactions={transactions} selectedYear={selectedYear} />
       </div>
@@ -191,6 +203,7 @@ function Dashboard() {
         open={isAddDialogOpen}
         onOpenChange={setIsAddDialogOpen}
         onAddTransaction={addTransaction}
+        defaultTab={initialTab}
       />
     </div>
   );

@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { TrendingUp, DollarSign, Trash2 } from 'lucide-react';
+import { TrendingUp, DollarSign, Trash2, Plus } from 'lucide-react';
 import { Transaction } from '../App';
 
 interface IncomeSectionProps {
@@ -10,9 +10,10 @@ interface IncomeSectionProps {
   selectedMonth: number;
   selectedYear: number;
   onDeleteTransaction: (transactionId: string) => void;
+  onQuickAdd: () => void;
 }
 
-export function IncomeSection({ transactions, selectedMonth, selectedYear, onDeleteTransaction }: IncomeSectionProps) {
+export function IncomeSection({ transactions, selectedMonth, selectedYear, onDeleteTransaction, onQuickAdd }: IncomeSectionProps) {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('es-CL', {
       style: 'currency',
@@ -60,10 +61,20 @@ export function IncomeSection({ transactions, selectedMonth, selectedYear, onDel
   return (
     <Card className="border-0 shadow-sm">
       <CardHeader className="pb-4">
-        <CardTitle className="flex items-center gap-2 text-emerald-700">
-          <TrendingUp className="h-5 w-5" />
-          Ingresos
-        </CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center gap-2 text-emerald-700">
+            <TrendingUp className="h-5 w-5" />
+            Ingresos
+          </CardTitle>
+          <Button 
+            size="sm" 
+            onClick={onQuickAdd} 
+            className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Agregar Ingreso
+          </Button>
+        </div>
         <p className="text-2xl text-emerald-600">{formatCurrency(totalMonthlyIncome)}</p>
         <p className="text-sm text-slate-600">Total del mes actual</p>
       </CardHeader>
