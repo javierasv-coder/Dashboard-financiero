@@ -7,6 +7,7 @@ import { AddGoalDialog } from './AddGoalDialog';
 import { Target, Calendar, TrendingUp, Plus, Trash2, PiggyBank, CheckCircle, Minus, Wallet } from 'lucide-react';
 import { Goal, Transaction } from '../App';
 import { useFreeSavings } from '../hooks/useFreeSavings'; // ajusta la ruta si es distinta
+import { toast } from 'sonner';
 
 interface GoalsSectionProps {
   usuarioId: number; // nuevo
@@ -74,22 +75,38 @@ export function GoalsSection({
   };
 
 
-  const handleContribution = (goalId: string) => {
+  const handleContribution = async (goalId: string) => {
     const amount = parseFloat(contributionAmounts[goalId] || '0');
     if (amount > 0) {
-      // Actualizar la meta
-      updateGoal(goalId, amount);
-      
-      // Crear transacción de ahorro que se descuenta del saldo
+      // 1. Buscar la meta actual para obtener datos
       const goal = goals.find(g => g.id === goalId);
-      addTransaction({
-        type: 'AHORRO',
-        amount: amount,
-        category: 'Meta: ' + (goal?.name || 'Meta financiera'),
-        description: `Ahorro para ${goal?.name || 'meta financiera'}`,
-        date: new Date().toISOString().split('T')[0]
-      });
       
+      if (goal) {
+        // --- REPLICANDO LÓGICA DEL TRIGGER ---
+        // En el trigger: NEW.monto_acumulado
+        // En React: (goal.currentAmount + amount)
+        const nuevoMontoAcumulado = (goal.currentAmount || 0) + amount;
+        
+        // En el trigger: UPPER(NEW.nombre)
+        const nombreMetaMayus = (goal.name || '').toUpperCase();
+
+        // 2. Actualizar el monto de la meta (Esto actualiza la tabla 'metas')
+        updateGoal(goalId, amount);
+        
+        // 3. Crear la transacción MANUALMENTE desde el frontend
+        // Esto reemplaza al: INSERT INTO transacciones ... VALUES ...
+        await addTransaction({
+          type: 'GASTO', // Replicando: 'GASTO'
+          amount: amount, // Replicando: monto_insert
+          category: 'Meta', // Replicando: 'META'
+          // Replicando: 'SE INGRESARON $' || NEW.monto_acumulado || ' A ' || UPPER(NEW.nombre)
+          description: `SE INGRESARON $${amount} PARA ${nombreMetaMayus}`, 
+          date: new Date().toISOString(), // Replicando: CURRENT_TIMESTAMP
+          meta_id: goal.id, // Asociar la transacción a la meta
+        });
+      }
+      
+      // Limpiar el input
       setContributionAmounts(prev => ({ ...prev, [goalId]: '' }));
     }
   };
@@ -103,15 +120,53 @@ export function GoalsSection({
   const handleAddFreeSaving = async () => {
     const amount = parseFloat(freeSavingAmount);
     if (amount > 0) {
+      // 1. Actualizar la tabla 'ahorro_libre' (Aumentar el saldo)
       await onAddFreeSavings(amount);
+      
+      // 2. REPLICAR LA LÓGICA DEL TRIGGER MANUALMENTE
+      // Insertamos la transacción para que aparezca inmediatamente como Gasto/Ahorro
+      await addTransaction({
+        type: 'GASTO',      // Según tu trigger: 'GASTO'
+        amount: amount,     // El monto que ingresaste
+        category: 'Ahorro', // Según tu trigger: 'AHORRO'
+        description: `SE INGRESARON $${amount} PARA AHORRO LIBRE`,
+        date: new Date().toISOString(),
+        // meta_id y cuenta_pendiente_id se quedan vacíos (null)
+      });
+
+      // 3. Limpiar el input
       setFreeSavingAmount('');
     }
   };
 
   const handleWithdrawFreeSaving = async () => {
     const amount = parseFloat(withdrawAmount);
-    if (amount > 0 ) {
-      await onWithdrawFreeSavings(amount); // ya no se guarda la descripción
+
+    if (amount > freeSavings) {
+      toast.error("Fondos insuficientes", {
+        description: `No puedes retirar ${formatCurrency(amount)} porque solo tienes ${formatCurrency(freeSavings)} disponibles.`,
+      });
+      return;
+    }
+    
+    if (amount > 0) {
+      // 1. Actualizar la tabla 'ahorro_libre' (Disminuir el saldo)
+      // Esto ejecuta la actualización en la tabla ahorro_libre
+      await onWithdrawFreeSavings(amount);
+
+      // 2. REPLICAR LA LÓGICA DEL TRIGGER MANUALMENTE
+      // Insertamos la transacción en el historial para que se vea al instante
+      await addTransaction({
+        type: 'INGRESO', // Tal como dice tu trigger (el dinero vuelve al saldo)
+        amount: amount,  // La diferencia (lo que sacaste)
+        category: 'Retiro de Ahorro',
+        description: `SE RETIRARON $${amount} DE AHORRO LIBRE`,
+        date: new Date().toISOString(),
+        // Nota: Según tu SQL, meta_id y cuenta_pendiente_id van como NULL, 
+        // así que no es necesario enviarlos (o se envían undefined)
+      });
+
+      // 3. Limpiar el input
       setWithdrawAmount('');
     }
   };

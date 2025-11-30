@@ -78,7 +78,7 @@ export function LoginPage() {
                 required
               />
             </div>
-            <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white" disabled={loading}>
+            <Button type="submit" className="w-full bg-emerald-600 hover:bg-emeralds-700 text-white" disabled={loading}>
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -99,7 +99,7 @@ export function LoginPage() {
             <button
               type="button"
               onClick={() => setIsSignUp(!isSignUp)}
-              className="text-blue-600 hover:underline font-medium"
+              className="text-emerald-600 hover:underline font-medium"
             >
               {isSignUp ? 'Inicia Sesión' : 'Regístrate'}
             </button>

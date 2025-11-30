@@ -24,7 +24,8 @@ export function useTransactions(usuarioId: string) {
         amount: Number(row.monto),
         category: row.categoria,
         description: row.descripcion,
-        date: row.fecha, // Asegúrate que “fecha” tenga tipo compatible (string o timestamp → string)
+        date: row.fecha,
+        meta_id: row.meta_id,
       }));
       setTransactions(mapped);
     }
@@ -43,6 +44,7 @@ export function useTransactions(usuarioId: string) {
           categoria: transaction.category,
           descripcion: transaction.description,
           fecha: transaction.date,
+          meta_id: transaction.meta_id,
         },
       ])
       .select();

@@ -26,6 +26,7 @@ export interface Transaction {
   category: string;
   description: string;
   date: string;
+  meta_id?: string | null;
 }
 
 export interface Goal {
